@@ -11,19 +11,45 @@
 
 <script>
 
+import {useStore} from 'vuex';
+import {ref,computed,watch} from 'vue';
+
 import AddPicture from "@/components/main/HoldAll/AddPicture";
 import AddSubtitle from "@/components/main/HoldAll/AddSubtitle";
 import SelectMedia from "@/components/main/HoldAll/SelectMedia";
+
 export default {
+
   name: "HoldAll",
   components: {SelectMedia, AddSubtitle, AddPicture},
-  data(){
+  setup(){
+    let addPictureVisible = ref(false);
+    let addSubtitleVisible = ref(false);
+    let selectMediaVisible = ref(true);
+    const store = useStore();
+    // { addPictureVisible,addSubtitleVisible, selectMediaVisible} = store;
+
+
+    const getShowTask = computed(()=>{
+      //返回的是ref对象
+      return store.state;
+    })
+
+    watch(getShowTask, (newVal, oldVal) => {
+      console.log('newVal, oldVal', newVal, oldVal)
+      addPictureVisible.value = newVal.addPictureVisible;
+      addSubtitleVisible.value = newVal.addSubtitleVisible;
+      selectMediaVisible.value = newVal.selectMediaVisible;
+
+    }, {immediate:true,deep:true});
+
+
     return {
-      addPictureVisible: false,
-      addSubtitleVisible:false,
-      selectMediaVisible:true,
+      addPictureVisible,
+      addSubtitleVisible,
+      selectMediaVisible
     }
-  },
+  }
 }
 </script>
 
@@ -40,4 +66,5 @@ export default {
   background: var(--el-color-primary-light-9);
   color: var(--el-color-primary);
 }
+
 </style>
