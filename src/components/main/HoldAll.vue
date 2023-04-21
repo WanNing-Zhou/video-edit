@@ -36,7 +36,7 @@ export default {
     })
 
     watch(getShowTask, (newVal, oldVal) => {
-      console.log('newVal, oldVal', newVal, oldVal)
+      // console.log('newVal, oldVal', newVal, oldVal)
       addPictureVisible.value = newVal.addPictureVisible;
       addSubtitleVisible.value = newVal.addSubtitleVisible;
       selectMediaVisible.value = newVal.selectMediaVisible;

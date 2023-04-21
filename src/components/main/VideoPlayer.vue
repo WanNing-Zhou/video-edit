@@ -1,10 +1,10 @@
 <template>
   <div class="video-player">
     <div class="player">
-      <video ref="myVideo" @loadeddata="setCover" :src="videoUrl" id="video_id" width="520" height="360" loop>
+      <video ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl" id="video_id" width="520" height="360" loop>
         你的浏览器不能支持HTML5视频
       </video>
-      <div class="control-box">
+      <div class="control-box" v-show="videoUrl!==''&&videoUrl">
         <el-icon class="control-icon" @click="backOff"  title="-5s">
           <DArrowLeft/>
         </el-icon>
@@ -25,7 +25,7 @@
 
 <script>
 import {useStore} from 'vuex'
-import {computed, watch} from "vue";
+import {computed, onMounted, watch,ref} from "vue";
 import {DArrowLeft, VideoPlay, VideoPause, DArrowRight} from '@element-plus/icons-vue'
 
 
@@ -41,20 +41,39 @@ export default {
       return store.state.videoUrl;
     })
 
+
     let kk = document.querySelector('.kk');
     const setCover = (event) => {//加载完成事件，调用函数
+
+      if (videoUrl.value !== ''&&videoUrl.value){
+        store.dispatch('updateVideoDuration',event.target.duration);
+        // console.log(store.state.video.videoDuration)
+      }
+
       const videoEl = event.target;
+
       let canvas = document.createElement("canvas");//canvas画布
-      console.log(videoEl.videoHeight)
+      // console.log(videoEl.videoHeight)
       canvas.width = 100;
       canvas.height = 80;
       canvas.getContext('2d').drawImage(videoEl, 0, 0, canvas.width, canvas.height);//画图
       store.dispatch('updateVideoImgUrl', canvas.toDataURL("image/png"))
     }
 
+    /**
+     * 当视频事间发生改变的时候调用
+     */
+
+    const videoTimeUpdateHandler = (event)=>{
+      // console.log(event.target.currentTime)
+        store.dispatch('updateVideoCurrentTime',event.target.currentTime)
+      console.log('currnet已经设置',store.state.video.videoCurrentTime)
+    }
+
     return {
       videoUrl,
       setCover,
+      videoTimeUpdateHandler,
     }
   },
   methods: {
@@ -77,6 +96,7 @@ export default {
       this.$refs.myVideo.currentTime !== this.$refs.myVideo.duration ? this.$refs.myVideo.currentTime += 5 : 1;
     }
   },
+
 
 }
 </script>
