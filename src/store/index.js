@@ -71,7 +71,12 @@ export const store =  createStore({
             sliceFragmentArr:[]
         },
         //输入框中的文字
-        inputValue:'',
+        subtitleValue:{
+            fontFamily:'',
+            fontSize:'',
+            color:'',
+            inputValue:''
+        },
     },
 
 
@@ -177,6 +182,12 @@ export const store =  createStore({
             }
             state.sliceFragment.sliceStep ++;
         },
+        setSubtitleValue(state,payload){
+            if(payload && payload.inputValue && payload.inputValue!==''){
+                payload.inputValue =  payload.inputValue.trim();
+                state.subtitleValue = payload;
+            }
+        },
 
     },
     getters: { // 相当于计算属性
@@ -275,7 +286,18 @@ export const store =  createStore({
             }
             context.commit('addVideoInputBarMarks',mark);
 
+        },
+
+        //保存字幕的值
+        setSubtitleValue(context,payload){
+            context.commit('setSubtitleValue',payload)
         }
+
+
+
+
+
+
 
 
     },

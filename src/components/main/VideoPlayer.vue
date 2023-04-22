@@ -6,7 +6,9 @@
         <video class="myVideo video-js"  id="myVideo" ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl"  width="520" height="360">
           你的浏览器不能支持HTML5视频
         </video>
-        <div class="drawingBoard"></div>
+        <div class="drawingBoard">
+          <div class="dv" ref="dv" :style="`font-family:${subtitleValue.fontFamily}; color:${subtitleValue.color};font-size:${subtitleValue.fontSize}`">{{subtitleValue.inputValue}}</div>
+        </div>
 <!--        <canvas></canvas>-->
       </div>
 
@@ -76,10 +78,11 @@ export default {
 
 
 
+    //监听事件变化
     watch(videoCurrentTime,(newValue)=>{
       // document.querySelector('.myVideo').currentTime = newValue;
       // this.$refs.myVideo.currentTime = newValue;
-      console.log('监听到变化了')
+      // console.log('监听到变化了')
       debounceGetCurrentTime(newValue)
     })
 
@@ -101,7 +104,6 @@ export default {
     /**
      * 当视频时间发生改变的时候调用
      */
-
     const videoTimeUpdateThrottle = throttle((event)=>{
       let videoCurrentTime = event.target.currentTime;
       let temp = videoCurrentTime;
@@ -122,15 +124,30 @@ export default {
       // console.log('currnet已经设置',store.state.video.videoCurrentTime)
     },100,false)
 
+    //监听视频时间变化
     const videoTimeUpdateHandler = (event)=>{
       videoTimeUpdateThrottle(event);
     }
+
+    const subtitleValue = computed(()=>{
+         let subtitle = store.state.subtitleValue;
+          // console.log(subtitle)
+         if(subtitle && subtitle.inputValue !== ''){
+           console.log('subtitle',subtitle.inputValue)
+           return subtitle;
+         }else{
+           return false;
+         }
+
+    })
+
 
 
     return {
       videoUrl,
       setCover,
       videoTimeUpdateHandler,
+      subtitleValue
     }
   },
   methods: {
@@ -206,9 +223,23 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 2;
 }
 
+.dv{
+  display: inline-block;
+  /*width:30px;*/
+  /*height:30px;*/
+  /*background-color: #0b97c4;*/
+  cursor: default;
+  user-select: none;
+}
 
+.dv:hover{
+
+  border: 2px orange solid;
+
+}
 
 
 

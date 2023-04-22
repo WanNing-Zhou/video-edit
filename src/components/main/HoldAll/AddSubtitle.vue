@@ -4,11 +4,11 @@
 
     <div>
       <span>字体大小</span>
-      <el-input-number v-model="fontSize" :min="8" :max="24" @change="handleChange"/>
+      <el-input-number v-model="fontSizeValue" :min="8" :max="24" @change="subtitleInput"/>
     </div>
 
     <div>
-      <el-select v-model="fontFamily" :style="`font-family:${value}`" class="m-2" placeholder="选择字体">
+      <el-select v-model="fontFamilyValue" @change="subtitleInput" :style="`font-family:${fontFamilyValue}`" class="m-2" placeholder="选择字体">
         <el-option
             v-for="item in options"
             :key="item.value"
@@ -20,26 +20,26 @@
     </div>
 
     <div>
-      <sapn>字体颜色</sapn>
-      <el-color-picker v-model="colorValue" lable="选择颜色" show-alpha :predefine="predefineColors"/>
+      <span>字体颜色</span>
+      <el-color-picker v-model="colorValue" @change="subtitleInput" lable="选择颜色" show-alpha :predefine="predefineColors"/>
     </div>
 
     <div>
       <span>字幕</span>
       <el-input
-          v-model="text"
+          v-model="textValue"
           maxlength="30"
-          placeholder="Please input"
+          placeholder="在这里输入字幕"
           show-word-limit
           :rows="2"
           type="textarea"
-          :style="`font-family:${value};`"
+          :style="`font-family:${fontFamilyValue};`"
+          @input="subtitleInput"
       />
     </div>
     <div>
       <el-button
           type="primary"
-          text="添加字幕"
           bg
       >添加字幕
       </el-button>
@@ -49,6 +49,7 @@
 
 <script>
 import {ref} from 'vue'
+import {useStore} from 'vuex'
 
 export default {
   name: "AddSubtitle",
@@ -72,11 +73,14 @@ export default {
       '#c7158577',
     ])
 
-    const handleChange = (value) => {
-      console.log(value)
-    }
+  const store = useStore();
 
-    const fontFamily = ref('')
+    // const handleChange = (value) => {
+    //   console.log(value)
+    // }
+
+
+    const fontFamilyValue = ref('')
 
     const options = [
       {
@@ -110,19 +114,33 @@ export default {
     ]
 
     //字体大小
-    const fontSize = ref('14')
+    const fontSizeValue = ref(14)
 
     //文本值
     const textValue = ref('')
 
+    //字幕输入时触发
+    const subtitleInput = ()=>{
+      let inputValue = textValue.value.trim();
+      if(inputValue && inputValue!==''){
+        console.log(inputValue)
+        let fontFamily = fontFamilyValue.value && fontFamilyValue.value!==''?fontFamilyValue.value:'"Microsoft Yahei"';
+        let color = colorValue.value && colorValue.value!=='' ? colorValue.value : 'black';
+        let fontSize = fontSizeValue.value + 'px'
+        store.dispatch('setSubtitleValue',{fontFamily,color,fontSize,inputValue})
+      }
+    }
+
     return {
       colorValue,
       predefineColors,
-      handleChange,
-      fontFamily,
+      // handleChange,
+      fontFamilyValue,
       options,
-      fontSize,
-      textValue
+      fontSizeValue,
+      textValue,
+      subtitleInput,
+
     }
   }
 }

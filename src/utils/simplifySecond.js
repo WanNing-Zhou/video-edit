@@ -12,5 +12,4 @@ export default function (seconds) {
         minutes: String(date.getUTCMinutes()).padStart(2, '0'),
         seconds: String(date.getUTCSeconds()).padStart(2, '0')
     };
-
 }

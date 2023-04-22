@@ -1,13 +1,5 @@
 /**
- * @file 节流函数
- * @author fengma1992
- * @date 2018/7/20
- * @param {(Function)} fn
- * @param {number} [delay=0] Unit: ms.
- * @param {boolean} [debounce=false]
- *        true: If call interval less than `delay`, only the last call works.
- *        false: If call interval less than `delay, call works on fixed rate.
- * @return {(Function)} throttled fn.
+ * 节流函数
  */
 function throttle (fn, delay, debounce) {
 
