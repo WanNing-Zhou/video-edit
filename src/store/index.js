@@ -21,6 +21,10 @@ export const store =  createStore({
             pause:true,
             play:false,
             isLoaded:false,
+        },
+        videTrack:{
+            valueRight:0,
+            valueLeft:0
         }
     },
 
@@ -61,6 +65,10 @@ export const store =  createStore({
         },
         updateVideoLoaded(state,payload){
             state.video.isLoaded = payload
+        },
+        updateVideoTrack(state,payload){
+            state.videTrack.valueLeft = payload[0];
+            state.videTrack.valueRight = payload[1];
         }
 
     },
@@ -97,7 +105,11 @@ export const store =  createStore({
         },
         updateVideoLoaded(context,payload){
             context.commit('updateVideoLoaded',payload)
-        }
+        },
+
+        updateVideoTrack(context,payload){
+            context.commit('updateVideoTrack',payload)
+        },
 
     },
     modules: {// 拆分模块

@@ -1,17 +1,21 @@
 <template>
   <div class="video-track">
-    <div class="util-bar">
-      <!-- 这里需存放各种工具     -->
-    </div>
-    <el-scrollbar>
-      <div class="cc">
-        <div class="progress" id="progress" :style="`width:${progressWidth}px`"></div>
-      </div>
-      <CropTool :duration="totalTime"
 
-                :currentPlayingTime="videoCurrentTime"
-                />
-<!--      <video-input-bar></video-input-bar>-->
+    <el-scrollbar>
+      <div class="util-bar">
+        <!-- 这里需存放各种工具     -->
+        <el-icon class="util-icon" title="撤销"><RefreshLeft /></el-icon>
+        <el-icon class="util-icon" title="分割"><SemiSelect /></el-icon>
+        <el-icon class="util-icon" title="删除"><Delete/></el-icon>
+      </div>
+      <div class="cc">
+        <!--视频进度条        -->
+        <div class="progress" id="progress" :style="`width:${progressWidth}px`"></div>
+
+        <!-- 视频进度条     -->
+        <video-input-bar></video-input-bar>
+      </div>
+
     </el-scrollbar>
   </div>
 </template>
@@ -19,10 +23,13 @@
 <script>
 import {onMounted, computed, watch, ref} from "vue";
 import {useStore} from "vuex";
+import {SemiSelect,Delete,RefreshLeft} from '@element-plus/icons-vue'
 import CropTool from "@/components/main/videoTrack/CropTool/CropTool";
+import VideoInputBar from "@/components/main/videoTrack/VideoInputBar";
 
 export default {
   name: "VideoTrack",
+  components: {VideoInputBar,SemiSelect,Delete,RefreshLeft},
   // components: {VideoInputBar},
   setup() {
     let timerId = null;
@@ -39,26 +46,22 @@ export default {
        return store.state.video.videoCurrentTime;
     })
 
-
-
-
     watch(videoCurrentTime,()=> {
       //通过dir获取
       //视频当前时间
       let curTime = videoCurrentTime.value; //通过dir获取
       //页面总宽度
 
-      console.log('totalTime',totalTime.value)
+      // console.log('totalTime',totalTime.value)
       // console.log('这是长度',totalWidth.value*curTime/totalTime.value)
       if(totalTime.value!==0 && totalTime.value){
-        console.log(totalWidth.value)
+        // console.log(totalWidth.value)
         progressWidth.value =  totalWidth.value * curTime / totalTime.value; //公式
       }
-      console.log('这是长度',progressWidth.value)
+      // console.log('这是长度',progressWidth.value)
 
     }, {immediate:true,deep:true})
     // onMounted(progressSupport)
-
 
 
     return {
@@ -87,4 +90,30 @@ export default {
   width: 500px;
   background-color: #0AAEB3;
 }
+.util-bar{
+  position: absolute;
+  top: 5%;
+  width: 600px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  color:black;
+  font-size:20px;
+}
+
+.util-bar .util-icon{
+  cursor: pointer;
+}
+
+.util-bar .util-icon:hover{
+  transform: scale(0.96);
+}
+
+.cc{
+   position: absolute;
+    top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+
 </style>

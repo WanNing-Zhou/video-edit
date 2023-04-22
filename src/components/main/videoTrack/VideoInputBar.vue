@@ -1,94 +1,103 @@
-
 <template>
-  <div class="slider-demo-block" :style="`width:${width}`">
-    <el-slider v-model="value" :show-tooltip="false" @input="onSliderChange" />
-    <ul class="slide-time">
-      <li v-for="(event, index) in events" :key="index">
-        <span class="time">
-          <span class="icon"></span>
-          {{ event.name }}
-        </span>
-      </li>
-    </ul>
+  <span>{{videoCurrentTime.toFixed(2)}} s / {{totalTime}}s</span>
+  <div class="slider-demo-block">
+    <el-slider v-model="value" range @change="valueChange" :marks="marks"/>
   </div>
+
 </template>
 
-<script setup>
-import moment from 'moment'
-import { ref, reactive, computed } from 'vue'
-const props = defineProps({
-  width: {
-    type: String,
-    default: '60%',
-  },
-  height: {
-    type: Number,
-    default: 6,
-  },
-  startTime: {
-    type: String,
-    default: '2023-04-16T09:00', //开始时间
-  },
-  endTime: {
-    type: String,
-    default: '2023-04-16T18:00',//结束时间
-  },
-})
-const state = reactive({
-  events: [],
-})
-const value = ref(0)
-//父组件调用函数
-const emits = defineEmits(['onSliderChange'])
-const generateTimeline = (start, end) => {
-  const events = []
-  let i = 1
-  let curr = moment(start).hours()
-  const endDt = moment(end).hours()
-  for (let i = curr; i <= endDt; i++) {
-    events.push({ id: i, name: moment().hours(i).format('HH') + ':00' })
-  }
-  return events
-}
-const onSliderChange = () => {
-  emits('onSliderChange', value1.value)
-}
-const events = computed(() => {
-  return generateTimeline(props.startTime, props.endTime)
-})
-</script>
+<script >
+import { reactive, ref ,computed,watch} from 'vue'
+import {useStore} from 'vuex'
+import {debounce} from "@/utils/debounce";
+export default {
+  name:'VideoInputBar',
+  setup(){
+    const store = useStore();
+    const value = ref([0, 0])
+    // const oldValue = ref([0,0])
 
-<style lang="scss" scoped>
-.slider-demo-block {
-  padding: 0 20px;
-  background: #fff;
-  border-radius: 10px;
-  :deep(.el-slider__bar) {
-    background-color: unset;
-  }
-  :deep(.el-slider__button) {
-    background-image: url('/src/assets/video/Slider.png');
-    background-size: 100%;
-    border: unset;
-    background-color: unset;
-  }
-  .slide-time {
-    display: flex;
-    justify-content: space-between;
-    line-height: 20px;
-    li {
-      display: inline-block;
-      .time {
-        color: gray;
-        .icon {
-          margin: 0 0 4px 18px;
-          display: block;
-          width: 2px;
-          height: 6px;
-          background: gray;
+    const marks = reactive({ //mark用来保留断点
+      0: '0°C',
+      8: '8°C',
+      37: '37°C',
+      50: {
+        style: {
+          color: '#1989FA',
+        },
+        label: '50%',
+      },
+    })
+
+    const totalTime = computed(()=>{
+      // console.log('状态发生了变化')
+      return store.state.video.videoDuration;
+    })
+    const videoCurrentTime = computed(()=>{
+      // console.log('时间发生了变化')
+      return store.state.video.videoCurrentTime;
+    })
+
+    watch(videoCurrentTime,()=> {
+      //通过dir获取
+      //视频当前时间
+      let curTime = videoCurrentTime.value; //通过dir获取
+      //页面总宽度
+      if(totalTime.value!==0 && totalTime.value){
+        value.value[1] = (curTime / totalTime.value)  * 100; //公式
+      }
+
+    }, {immediate:true,deep:true})
+
+    //监听视频导轨的数据
+/*    watch(value ,(newValue,oldValue)=> {
+      if(store.state.videoUrl!=='' && store.state.videoUrl){
+        let time = 0;
+        if (newValue['1'] !== oldValue['1']){
+          time = newValue['1'] * totalTime.value/100;
+          store.dispatch('updateVideoCurrentTime',time)
+          console.log('设置时间',time)
+        }
+        if(newValue['0'] !== oldValue['0']){
+          time = newValue['0'] * totalTime.value/100;
+          store.dispatch('updateVideoCurrentTime',time)
         }
       }
+    }, {immediate:true,deep:true})*/
+
+    /*为事件防抖*/
+    const debounceValueChange = debounce((value)=>{
+      if(store.state.videoUrl !== '' && store.state.videoUrl){
+        console.log('防抖执行了')
+        let time =value[1]  *totalTime.value /100;
+        store.dispatch('updateVideoCurrentTime',time)
+      }
+    },200,false)
+
+     const valueChange = ()=>{
+       debounceValueChange(value.value)
+     }
+
+    return {
+      marks,
+      value,
+      totalTime,
+      videoCurrentTime,
+      valueChange
     }
   }
 }
+
+</script>
+<style scoped>
+.slider-demo-block {
+  display: flex;
+  align-items: center;
+}
+.slider-demo-block .el-slider {
+  margin-top: 0;
+  margin-left: 12px;
+
+}
+
 </style>

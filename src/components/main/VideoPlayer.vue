@@ -1,7 +1,7 @@
 <template>
   <div class="video-player">
     <div class="player">
-      <video ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl" id="video_id" width="520" height="360" loop>
+      <video class="myVideo" ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl" id="video_id" width="520" height="360" loop>
         你的浏览器不能支持HTML5视频
       </video>
       <div class="control-box" v-show="videoUrl!==''&&videoUrl">
@@ -25,9 +25,9 @@
 
 <script>
 import {useStore} from 'vuex'
-import {computed, onMounted, watch,ref} from "vue";
+import {computed,nextTick, onMounted, watch,ref} from "vue";
 import {DArrowLeft, VideoPlay, VideoPause, DArrowRight} from '@element-plus/icons-vue'
-
+import {debounce} from "@/utils/debounce";
 
 export default {
   name: "VideoPlayer",
@@ -41,10 +41,22 @@ export default {
       return store.state.videoUrl;
     })
 
+    const videoCurrentTime = computed(()=>{
+      return store.state.video.videoCurrentTime;
+    })
+
+    const debounceGetCurrentTime = debounce((newValue)=>{
+      document.querySelector('.myVideo').currentTime = newValue;
+    },500,false)
+
+    watch(videoCurrentTime,(newValue)=>{
+      // document.querySelector('.myVideo').currentTime = newValue;
+      // this.$refs.myVideo.currentTime = newValue;
+      debounceGetCurrentTime(newValue)
+    })
 
     let kk = document.querySelector('.kk');
     const setCover = (event) => {//加载完成事件，调用函数
-
       if (videoUrl.value !== ''&&videoUrl.value){
         store.dispatch('updateVideoDuration',event.target.duration);
         // console.log(store.state.video.videoDuration)
@@ -67,7 +79,7 @@ export default {
     const videoTimeUpdateHandler = (event)=>{
       // console.log(event.target.currentTime)
         store.dispatch('updateVideoCurrentTime',event.target.currentTime)
-      console.log('currnet已经设置',store.state.video.videoCurrentTime)
+      // console.log('currnet已经设置',store.state.video.videoCurrentTime)
     }
 
     return {
@@ -96,6 +108,8 @@ export default {
       this.$refs.myVideo.currentTime !== this.$refs.myVideo.duration ? this.$refs.myVideo.currentTime += 5 : 1;
     }
   },
+
+
 
 
 }
