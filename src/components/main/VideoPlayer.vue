@@ -2,9 +2,15 @@
   <div class="video-player">
     <div class="player">
 <!--      <video-play></video-play>-->
-      <video class="myVideo video-js " id="myVideo" ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl"  width="520" height="360" loop>
-        你的浏览器不能支持HTML5视频
-      </video>
+      <div class="video-screen">
+        <video class="myVideo video-js"  id="myVideo" ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl"  width="520" height="360">
+          你的浏览器不能支持HTML5视频
+        </video>
+        <div class="drawingBoard"></div>
+<!--        <canvas></canvas>-->
+      </div>
+
+
       <div class="control-box" v-show="videoUrl!==''&&videoUrl">
         <el-icon class="control-icon" @click="backOff"  title="-5s">
           <DArrowLeft/>
@@ -30,6 +36,7 @@ import {computed,nextTick, onMounted, watch,ref,reactive,getCurrentInstance} fro
 import {DArrowLeft, VideoPlay, VideoPause, DArrowRight} from '@element-plus/icons-vue'
 import {debounce} from "@/utils/debounce";
 import videojs from 'video.js/dist/video'
+import throttle from '@/utils/throttle'
 
 export default {
   name: "VideoPlayer",
@@ -40,7 +47,7 @@ export default {
 
     onMounted(()=>{
       player = reactive(videojs(getCurrentInstance().proxy.$refs.myVideo))
-      console.log('palyer',player)
+      // console.log('palyer',player)
       // player.width = 520;
       // player.height = 210;
     })
@@ -56,6 +63,7 @@ export default {
     const videoCurrentTime = computed(()=>{
       return store.state.video.videoCurrentTime;
     })
+
 
     const {proxy} = getCurrentInstance();
 
@@ -81,9 +89,7 @@ export default {
         store.dispatch('updateVideoDuration',event.target.duration);
         // console.log(store.state.video.videoDuration)
       }
-
       const videoEl = event.target;
-
       let canvas = document.createElement("canvas");//canvas画布
       // console.log(videoEl.videoHeight)
       canvas.width = 100;
@@ -93,13 +99,31 @@ export default {
     }
 
     /**
-     * 当视频事间发生改变的时候调用
+     * 当视频时间发生改变的时候调用
      */
 
-    const videoTimeUpdateHandler = (event)=>{
+    const videoTimeUpdateThrottle = throttle((event)=>{
+      let videoCurrentTime = event.target.currentTime;
+      let temp = videoCurrentTime;
+      let fragmentLength = store.state.deleteOptions.optionStep;
+      let fragArr = store.state.deleteOptions.optionArr;
+      console.log(fragArr)
+      for(let i = 0; i <  fragmentLength ; i++){
+        let videoFrag =  fragArr[i];
+        if (videoCurrentTime>=videoFrag[0] && videoCurrentTime <= videoFrag[1]){
+          videoCurrentTime = videoFrag[1];
+        }
+      }
+      if(videoCurrentTime>temp){
+        player.currentTime(videoCurrentTime)
+      }
       // console.log(event.target.currentTime)
-        store.dispatch('updateVideoCurrentTime',event.target.currentTime)
+      store.dispatch('updateVideoCurrentTime',videoCurrentTime)
       // console.log('currnet已经设置',store.state.video.videoCurrentTime)
+    },100,false)
+
+    const videoTimeUpdateHandler = (event)=>{
+      videoTimeUpdateThrottle(event);
     }
 
 
@@ -128,12 +152,9 @@ export default {
       this.$refs.myVideo.currentTime !== 0 ? this.$refs.myVideo.currentTime -= 5 : 1;
     },
     forward(){
-      this.$refs.myVideo.currentTime !== this.$refs.myVideo.duration ? this.$refs.myVideo.currentTime += 5 : 1;
+      this.$refs.myVideo.currentTime !== this.$refs.myVideo.duration ? this.$refs.myVideo.currentTime += 5 : this.$refs.myVideo.duration;
     }
   },
-
-
-
 
 }
 </script>
@@ -168,5 +189,27 @@ export default {
 .control-box .control-icon:hover{
   transform: scale(0.95);
 }
+
+.video-screen{
+  position: relative;
+  width: 750px;
+  height: 470px;
+}
+
+.myVideo{
+  position: absolute;
+  width: 750px;
+  height: 470px;
+}
+
+.drawingBoard{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
 
 </style>

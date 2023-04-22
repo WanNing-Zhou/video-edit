@@ -3,7 +3,6 @@
   <div class="slider-demo-block">
     <el-slider v-model="value" range @change="valueChange" :marks="marks"/>
   </div>
-
 </template>
 
 <script >
@@ -17,16 +16,8 @@ export default {
     const value = ref([0, 0])
     // const oldValue = ref([0,0])
 
-    const marks = reactive({ //mark用来保留断点
-      0: '0°C',
-      8: '8°C',
-      37: '37°C',
-      50: {
-        style: {
-          color: '#1989FA',
-        },
-        label: '50%',
-      },
+    const marks = computed(()=>{
+      return store.state.videTrack.videoInputBarMarks;
     })
 
     const totalTime = computed(()=>{
@@ -68,11 +59,12 @@ export default {
     /*为事件防抖*/
     const debounceValueChange = debounce((value)=>{
       if(store.state.videoUrl !== '' && store.state.videoUrl){
-        console.log('防抖执行了')
+        // console.log('防抖执行了')
         let time =value[1]  *totalTime.value /100;
         store.dispatch('updateVideoCurrentTime',time)
+        store.dispatch('updateInputBarValue',value);
       }
-    },200,false)
+    },200,true)
 
      const valueChange = ()=>{
        debounceValueChange(value.value)

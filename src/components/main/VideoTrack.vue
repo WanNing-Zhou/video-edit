@@ -6,13 +6,12 @@
       <div class="util-bar">
         <!-- 这里需存放各种工具     -->
         <el-icon class="util-icon" title="撤销"><RefreshLeft /></el-icon>
-        <el-icon class="util-icon" title="分割"><SemiSelect /></el-icon>
+        <el-icon class="util-icon" title="分割" @click="sliceFragment"><SemiSelect /></el-icon>
         <el-icon class="util-icon" title="删除" @click="deleteFragment" ><Delete/></el-icon>
       </div>
       <div class="cc">
         <!--视频进度条        -->
         <div class="progress" id="progress" :style="`width:${progressWidth}px`"></div>
-
         <!-- 视频进度条     -->
         <video-input-bar></video-input-bar>
       </div>
@@ -27,6 +26,7 @@ import {useStore} from "vuex";
 import {SemiSelect,Delete,RefreshLeft} from '@element-plus/icons-vue'
 import VideoInputBar from "@/components/main/videoTrack/VideoInputBar";
 import videojs from 'video.js/dist/video'
+import { ElMessage } from 'element-plus'
 
 
 export default {
@@ -36,7 +36,7 @@ export default {
   setup() {
     let timerId = null;
     const progressWidth =ref(0);
-    const totalWidth = ref(500);
+    const totalWidth = ref(1000);
     const store = useStore();
 
 
@@ -61,6 +61,7 @@ export default {
         // console.log(totalWidth.value)
         progressWidth.value =  totalWidth.value * curTime / totalTime.value; //公式
       }
+
       // console.log('这是长度',progressWidth.value)
 
     }, {immediate:true,deep:true})
@@ -68,8 +69,51 @@ export default {
 
     //删除片段，从而达到剪辑效果
     const deleteFragment= ()=>{
-      //在状态中加入删除的历史记录
 
+      let inputBarValue = [store.state.videTrack.inputBarValue['0'],store.state.videTrack.inputBarValue['1']];
+      console.log(inputBarValue)
+      let temp = 0;
+      let left = inputBarValue[0];
+      let right = inputBarValue[1];
+      if (left > right){
+        temp = left;
+        left = right;
+        right = temp;
+      }
+
+      left = left/100.0 * totalTime.value;
+      right = right/100.0 * totalTime.value;
+
+      // console.log('删除的片段',[left,right])
+      store.dispatch('pushDeleteOptions',[left,right]);
+
+      //在状态中加入删除的历史记录
+      ElMessage({
+        message: '删除片段成功',
+        type: 'success',
+      })
+    }
+    const sliceFragment = ()=>{
+      //获取切片得时长
+      let inputBarValue = [store.state.videTrack.inputBarValue['0'],store.state.videTrack.inputBarValue['1']];
+      let temp = 0;
+      let left = inputBarValue[0];
+      let right = inputBarValue[1];
+      if (left > right){
+        temp = left;
+        left = right;
+        right = temp;
+      }
+
+      right = right/100.0 * totalTime.value;
+
+      store.dispatch('addSliceFragmentArr',right);
+
+      //在状态中加入删除的历史记录
+      ElMessage({
+        message: '分割片段成功',
+        type: 'success',
+      })
     }
 
     return {
@@ -77,6 +121,7 @@ export default {
       videoCurrentTime,
       totalTime,
       deleteFragment,
+      sliceFragment
     }
   }
 }
@@ -96,7 +141,7 @@ export default {
 }
 .cc{
   height: 4px;
-  width: 500px;
+  width: 1000px;
   background-color: #0AAEB3;
 }
 .util-bar{
