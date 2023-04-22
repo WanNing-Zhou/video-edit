@@ -1,12 +1,13 @@
 <template>
   <div class="video-track">
 
+
     <el-scrollbar>
       <div class="util-bar">
         <!-- 这里需存放各种工具     -->
         <el-icon class="util-icon" title="撤销"><RefreshLeft /></el-icon>
         <el-icon class="util-icon" title="分割"><SemiSelect /></el-icon>
-        <el-icon class="util-icon" title="删除"><Delete/></el-icon>
+        <el-icon class="util-icon" title="删除" @click="deleteFragment" ><Delete/></el-icon>
       </div>
       <div class="cc">
         <!--视频进度条        -->
@@ -21,11 +22,12 @@
 </template>
 
 <script>
-import {onMounted, computed, watch, ref} from "vue";
+import {onMounted, computed, watch, ref,reactive,getCurrentInstance} from "vue";
 import {useStore} from "vuex";
 import {SemiSelect,Delete,RefreshLeft} from '@element-plus/icons-vue'
-import CropTool from "@/components/main/videoTrack/CropTool/CropTool";
 import VideoInputBar from "@/components/main/videoTrack/VideoInputBar";
+import videojs from 'video.js/dist/video'
+
 
 export default {
   name: "VideoTrack",
@@ -36,6 +38,7 @@ export default {
     const progressWidth =ref(0);
     const totalWidth = ref(500);
     const store = useStore();
+
 
     const totalTime = computed(()=>{
       // console.log('状态发生了变化')
@@ -63,11 +66,17 @@ export default {
     }, {immediate:true,deep:true})
     // onMounted(progressSupport)
 
+    //删除片段，从而达到剪辑效果
+    const deleteFragment= ()=>{
+      //在状态中加入删除的历史记录
+
+    }
 
     return {
       progressWidth,
       videoCurrentTime,
       totalTime,
+      deleteFragment,
     }
   }
 }

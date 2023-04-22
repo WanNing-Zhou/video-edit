@@ -1,7 +1,8 @@
 <template>
   <div class="video-player">
     <div class="player">
-      <video class="myVideo" ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl" id="video_id" width="520" height="360" loop>
+<!--      <video-play></video-play>-->
+      <video class="myVideo video-js " id="myVideo" ref="myVideo" @timeupdate="videoTimeUpdateHandler" @loadeddata="setCover" :src="videoUrl"  width="520" height="360" loop>
         你的浏览器不能支持HTML5视频
       </video>
       <div class="control-box" v-show="videoUrl!==''&&videoUrl">
@@ -25,14 +26,25 @@
 
 <script>
 import {useStore} from 'vuex'
-import {computed,nextTick, onMounted, watch,ref} from "vue";
+import {computed,nextTick, onMounted, watch,ref,reactive,getCurrentInstance} from "vue";
 import {DArrowLeft, VideoPlay, VideoPause, DArrowRight} from '@element-plus/icons-vue'
 import {debounce} from "@/utils/debounce";
+import videojs from 'video.js/dist/video'
 
 export default {
   name: "VideoPlayer",
   components: {DArrowLeft, DArrowRight, VideoPlay, VideoPause},
   setup() {
+
+    let player = null;
+
+    onMounted(()=>{
+      player = reactive(videojs(getCurrentInstance().proxy.$refs.myVideo))
+      console.log('palyer',player)
+      // player.width = 520;
+      // player.height = 210;
+    })
+
 
     const store = useStore();
 
@@ -45,13 +57,21 @@ export default {
       return store.state.video.videoCurrentTime;
     })
 
+    const {proxy} = getCurrentInstance();
+
+
     const debounceGetCurrentTime = debounce((newValue)=>{
-      document.querySelector('.myVideo').currentTime = newValue;
-    },500,false)
+      // player.currentTime = newValue;
+      // console.log(player)
+      player.currentTime(newValue)
+    },300,false)
+
+
 
     watch(videoCurrentTime,(newValue)=>{
       // document.querySelector('.myVideo').currentTime = newValue;
       // this.$refs.myVideo.currentTime = newValue;
+      console.log('监听到变化了')
       debounceGetCurrentTime(newValue)
     })
 
@@ -82,6 +102,7 @@ export default {
       // console.log('currnet已经设置',store.state.video.videoCurrentTime)
     }
 
+
     return {
       videoUrl,
       setCover,
@@ -90,6 +111,8 @@ export default {
   },
   methods: {
     operateVideo() {
+      // const store = useStore()
+      console.log('store',this.$store)
       if (this.$refs.myVideo.paused) {
         this.$refs.myVideo.play();
         this.videoState = true;

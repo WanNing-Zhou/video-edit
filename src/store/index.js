@@ -25,7 +25,14 @@ export const store =  createStore({
         videTrack:{
             valueRight:0,
             valueLeft:0
-        }
+        },
+        //用来保存历史操作
+        history:[],
+        //用来保存当前操作
+        currentWork:{},
+        //删除栈
+        deleteOptions:[],
+
     },
 
 
