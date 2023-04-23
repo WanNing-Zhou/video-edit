@@ -23,11 +23,11 @@
           >{{ subtitleValue.inputValue }}
           </div>
 
-          <template v-show="subtitlesArr">
-            <div v-for="item in options"
+            <div v-for=" item in subtitleArr"
+                 :style="`position:absolute;font-family:${item.fontFamily}; color:${item.color};font-size:${item.fontSize};left:${item.left};top:${item.top};z-index:1;`"
+                 :key="item.position"
+            >{{item.inputValue}}</div>
 
-            >{{}}</div>
-          </template>
 
         </div>
         <!--        <canvas></canvas>-->
@@ -133,11 +133,13 @@ export default {
       let temp = videoCurrentTime;
       let fragmentLength = store.state.deleteOptions.optionStep;
       let fragArr = store.state.deleteOptions.optionArr;
-      console.log(fragArr)
+      // console.log(fragArr)
+
+      //判断是否使是删除的视频部分
       for (let i = 0; i < fragmentLength; i++) {
         let videoFrag = fragArr[i];
         if (videoCurrentTime >= videoFrag[0] && videoCurrentTime <= videoFrag[1]) {
-          videoCurrentTime = videoFrag[1];
+          videoCurrentTime = videoFrag[1] + 0.01;
         }
       }
 
@@ -154,6 +156,7 @@ export default {
       videoTimeUpdateThrottle(event);
     }
 
+    // 获取正在输入的字幕
     const subtitleValue = computed(() => {
       let subtitle = store.state.subtitleValue;
       // console.log(subtitle)
@@ -161,28 +164,31 @@ export default {
         // console.log('subtitle', subtitle.inputValue)
         return subtitle;
       } else {
-        return false;
+        return [];
       }
     });
 
-    const subtitlesArr= computed(()=>{
+    // const settitleArr = reactive({})
+
+    const subtitleArr= computed(()=>{
       const currentFragIndex = store.state.video.currentFragIndex;
       //获取当前视频片段
       const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
-      if(fragment && fragment.subtitleArr.length > 0){
-        return subtitlesArr;
+      if(fragment && fragment.subtitleArr && fragment.subtitleArr.length > 0){
+        console.log(fragment.subtitleArr)
+        return fragment.subtitleArr;
       }else{
         return false;
       }
-
     })
+
 
     return {
       videoUrl,
       setCover,
       videoTimeUpdateHandler,
       subtitleValue,
-      subtitlesArr,
+      subtitleArr,
     }
   },
 
@@ -215,12 +221,14 @@ export default {
         this.videoState = false;
       }
     },
+    //视频回退
     backOff() {
       this.$refs.myVideo.currentTime !== 0 ? this.$refs.myVideo.currentTime -= 5 : 1;
     },
     forward() {
       this.$refs.myVideo.currentTime !== this.$refs.myVideo.duration ? this.$refs.myVideo.currentTime += 5 : this.$refs.myVideo.duration;
     },
+
 
     mousedownHandler(event) {
 

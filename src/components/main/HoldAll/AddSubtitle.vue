@@ -150,7 +150,7 @@ export default {
     }
 
     //点击添加字幕的时候进行操作
-    const addSubtitleHandler = ()=>{
+    const addSubtitleHandler = async ()=>{
       //获取当前时间片段
       const currentFragIndex = store.state.video.currentFragIndex;
       // console.log(currentFragIndex)
@@ -166,11 +166,19 @@ export default {
       let inputValue = textValue.value.trim();
       const subtitleValue = store.state.subtitleValue;
       if(inputValue && inputValue!==''){
-        store.dispatch('addSubtitleArr',subtitleValue)
+        await store.dispatch('addSubtitleArr',subtitleValue)
+
+        textValue.value = ''
+        await store.dispatch('clearInputValue')
+        ElMessage({
+          showClose: true,
+          message: '添加字幕成功',
+          type: 'success',
+        })
       }else{
         ElMessage({
           showClose: true,
-          message: '字幕能为空',
+          message: '字幕不能能为空',
           type: 'warning',
         })
         return;

@@ -1,8 +1,11 @@
 <template>
   <div class="selected-media">
     <h2>选择媒体</h2>
-
-    <input type="file" id="file" @change="handleFileSelect">
+    <el-button class="file-box" text>
+      <input type="file" id="file" class="file-btn" required
+             @change="handleFileSelect"/> 选择文件
+    </el-button>
+<!--    <input type="file" id="file" @change="handleFileSelect">-->
     <br>
 <!--    <img class="kk" :src="videoImgUrl" alt="视频缩略图">-->
     <video width="200" height="150" :src="videoUrl" loop></video>
@@ -67,12 +70,12 @@ export default {
     const handleFileSelect = () => {
       // console.log(hello)
       const file = document.getElementById('file').files[0];
-      console.log(file)
+      // console.log(file)
       if(file){
         const url = URL.createObjectURL(file);
         videoUrl.value = url;
         store.dispatch('updateVideoUrl',url);
-        console.log(url);
+        // console.log(url);
       }
       // document.getElementById("video_id").src = url;
     }
@@ -90,5 +93,24 @@ export default {
 </script>
 
 <style scoped>
+.file-box {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  color: rgb(252, 113, 0);
+  background-color: rgb(255, 255, 255);
+}
 
+.file-btn {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  outline: none;
+  filter: alpha(opacity=0);
+  -moz-opacity: 0;
+  -khtml-opacity: 0;
+  opacity: 0;
+}
 </style>

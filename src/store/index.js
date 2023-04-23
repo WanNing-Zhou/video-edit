@@ -96,12 +96,24 @@ export const store = createStore({
             //字幕值
             inputValue: '',
             //文字位置
-            top: '0px',
-            left: '0px',
-
+            top: '20px',
+            left: '20px',
             // 字幕的物理存储位置(用于后期对字幕的修改和删除)
-            position: '',
+            position:'', //存放存放位置用来确定
         },
+
+        //贴图(有些属性不知道能不能实现,咱得先有)
+        pictureValue:{
+            name:'',
+            url:'',
+            top:'20px',
+            left:'20px',
+            size:'',
+            rotate:'',
+            // 图片都物理存放位置;
+            position:'',
+        }
+
     },
 
 
@@ -268,6 +280,7 @@ export const store = createStore({
          *  //文字位置
          *  top:'0px',
          *  left:'0px',
+         *  id:; //用作生成时候的唯一标识
          *},
          *
          */
@@ -276,15 +289,14 @@ export const store = createStore({
             console.log('niaho')
             //如果没有字幕则进行初始化
             if (!state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr) {
-                console.log('hehe')
+                // console.log('hehe')
                 state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr = [];
             }
-            //添加字幕
-            if (payload.position && payload.position!==''){
 
-            }
-            state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.push(payload);
-            console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
+            payload.position =   state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length;
+
+            state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.push(deepCopy(payload));
+            // console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
 
             //添加操作栈
             let length = state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length;
@@ -294,8 +306,22 @@ export const store = createStore({
                 position: length - 1,
                 subtitleValue: payload
             }
-            console.log('操作栈添加了吗',state.subtitlesArrState.subtitlesArr )
+            // console.log('操作栈添加了吗',state.subtitlesArrState.subtitlesArr )
             state.subtitlesArrState.subtitleStep++;
+        },
+        //清空输入值
+        clearInputValue(state){
+            state.subtitleValue.inputValue = '';
+            state.subtitleValue.left = '20px';
+            state.subtitleValue.right = '20px';
+            state.subtitleValue.position = '';
+
+        },
+        //设置图片值
+        setPictureValue(state,payload){
+            state.pictureValue.name = payload.name;
+            state.pictureValue.url = payload.url;
+            state.pictureValue.size = payload.size;
         }
     },
     getters: { // 相当于计算属性
@@ -411,9 +437,21 @@ export const store = createStore({
 
         //添加字幕
         addSubtitleArr(context, payload) {
-            context.commit('pushHistoryOptions', options.ADD_SUBTITLE);
             context.commit('addSubtitleArr', payload);
+            context.commit('pushHistoryOptions', options.ADD_SUBTITLE);
+        },
+        //清空输入值
+        clearInputValue(context){
+            context.commit('clearInputValue');
+        },
+
+        //设置图片的值
+        setPictureValue(context,payload){
+            context.commit('setPictureValue',payload);
         }
+
+        //
+
 
     },
     modules: {// 拆分模块

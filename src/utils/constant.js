@@ -2,8 +2,12 @@
 const options={
     //删除操作
     DELETE:1,
+    //切片操作
     SLICE:2,
+    //添加字幕
     ADD_SUBTITLE:3,
+    //添加贴图
+    ADD_PICTURE:4,
     color:{
         DELETE_COLOR : '#cc0000',
         SLICE_COLOR: '#271daf'

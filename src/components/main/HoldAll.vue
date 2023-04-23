@@ -1,3 +1,4 @@
+//功能组件
 <template>
   <div class="hold-all">
     <el-scrollbar >
