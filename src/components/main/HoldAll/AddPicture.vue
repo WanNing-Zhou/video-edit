@@ -11,7 +11,16 @@
         @click="addPictureHandler"
     >确认添加
     </el-button>
-    <el-input-number v-model="fontSizeValue" :min="8" :max="46" @change="subtitleInput"/>
+    <div>
+      <span>图片大小</span>
+      <el-input-number v-model="pictureSizeValue" :min="16" :max="500" @change="setPictureValue"/>
+    </div>
+
+    <div>
+      <span>旋转角度</span>
+      <el-input-number v-model="pictureRotateValue" :min="0" :max="360" @change="setPictureValue"/>
+    </div>
+
     <el-upload
         v-model:file-list="imgList"
         class="upload-demo"
@@ -53,17 +62,11 @@ export default {
   setup() {
 
     const store = useStore();
+    const pictureRotateValue  = ref(0);
     const imgList = ref([
-      {
-        name: 'element-plus-logo.svg',
-        url: 'https://element-plus.org/images/element-plus-logo.svg',
-      },
-      {
-        name: 'element-plus-logo2.svg',
-        url: 'https://element-plus.org/images/element-plus-logo.svg',
-      },
     ])
 
+    const pictureSizeValue = ref(120);
     const handleRemove = (file, uploadFiles) => {
       console.log(file, uploadFiles)
     }
@@ -91,36 +94,56 @@ export default {
     }
 
     // const fileInput = ref();
+    //全局存储照片名
+    let name = '';
+    // 照片路径
+    let url = '';
     //选择文件操作
+
+    const setPictureValue = ()=>{
+      // console.log(`进入了`,name,url)
+      if(name&&name!==''&&url&&url!==''){
+        let size = pictureSizeValue.value + 'px';
+        let rotate = pictureRotateValue.value + 'deg';
+        store.dispatch('setPictureValue',{name,url,size,rotate})
+        console.log('pic',store.state.pictureValue)
+      }
+
+    }
     const handleFileSelect = () => {
       // console.log(fileInput.value)
       const file = document.getElementById('fileInput').files[0];
-      const name = file.name;//读取选中文件的文件名
+      name = file.name;//读取选中文件的文件名
       console.log(name,file)
       if(file){
-        const url = URL.createObjectURL(file);
+        url = URL.createObjectURL(file);
         imgList.value.push({
           name,
           url,
-        },)
-        // videoUrl.value = url;
-        store.dispatch('updateVideoUrl',url);
+        })
+
+       setPictureValue()
         // console.log(url);
       }
     }
+
+
 
     const addPictureHandler = ()=>{
 
     }
 
     return {
+      pictureRotateValue,
+      pictureSizeValue,
       imgList,
       handleRemove,
       handlePreview,
       handleExceed,
       beforeRemove,
       handleFileSelect,
-      addPictureHandler
+      addPictureHandler,
+      setPictureValue
     }
   },
 }

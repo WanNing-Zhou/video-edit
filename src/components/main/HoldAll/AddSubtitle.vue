@@ -183,7 +183,7 @@ export default {
         })
         return;
       }
-      console.log(subtitleArr);
+      // console.log(subtitleArr);
     }
 
     return {

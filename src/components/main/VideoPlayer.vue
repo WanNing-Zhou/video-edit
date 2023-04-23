@@ -28,7 +28,17 @@
                  :key="item.position"
             >{{item.inputValue}}</div>
 
-
+          <img
+              class="mg"
+              ref="mg"
+              :style="`user-select:none;display:inline-block;position:absolute;left:${pictureValue.left};top:${pictureValue.top};z-index:2;width:${pictureValue.size};transform:rotate(${pictureValue.rotate});`"
+              :src="pictureValue.url"
+              draggable="false"
+              oncontextmenu="return false;"
+              @mousedown="mousedownImgHandler"
+              @mousemove="mousemoveImgHandler"
+              @mouseup="mouseupHandler"
+          >
         </div>
         <!--        <canvas></canvas>-->
       </div>
@@ -164,19 +174,32 @@ export default {
         // console.log('subtitle', subtitle.inputValue)
         return subtitle;
       } else {
-        return [];
+        return false;
       }
     });
 
     // const settitleArr = reactive({})
 
+    //获取当前片段的字幕数组
     const subtitleArr= computed(()=>{
       const currentFragIndex = store.state.video.currentFragIndex;
       //获取当前视频片段
       const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
       if(fragment && fragment.subtitleArr && fragment.subtitleArr.length > 0){
-        console.log(fragment.subtitleArr)
+        // console.log(fragment.subtitleArr)
         return fragment.subtitleArr;
+      }else{
+        return [];
+      }
+    })
+
+    //获取图片值
+    const pictureValue = computed(()=>{
+      const picture = store.state.pictureValue;
+      // console.log('picture',picture)
+      if(picture&&picture.name!==''){
+        // console.log('进入啦');
+        return picture;
       }else{
         return false;
       }
@@ -189,6 +212,7 @@ export default {
       videoTimeUpdateHandler,
       subtitleValue,
       subtitleArr,
+      pictureValue
     }
   },
 
@@ -203,8 +227,18 @@ export default {
         left : '20px',
         top :  '30px',
         isDown: false,
+      },
+      //存储mg状态
+      mgStyle:{
+        x: 0,
+        l: 0,
+        t: 0,
+        left: '20px',
+        top:'30px',
+        isDown: false,
       }
     }
+
   },
   methods: {
     operateVideo() {
@@ -231,6 +265,7 @@ export default {
 
 
     mousedownHandler(event) {
+      // console.log()
 
       const dv = this.$refs.dv;
       //获取x坐标
@@ -293,9 +328,69 @@ export default {
     mouseupHandler() {
       //开关关闭
       const dv = this.$refs.dv;
+      const mg = this.$refs.mg;
       this.dvStyle.isDown = false;
+      this.mgStyle.isDown = false;
       dv.style.cursor = 'default';
+      mg.style.cursor = 'default';
     },
+    //鼠标按下
+    mousedownImgHandler(event){
+      const mg = this.$refs.mg;
+      //获取x坐标
+      this.mgStyle.x = event.clientX;
+      this.mgStyle.y = event.clientY;
+
+      // console.log(dv)
+      //获取左部和顶部的偏移量
+      this.mgStyle.l = mg.offsetLeft;
+      this.mgStyle.t = mg.offsetTop;
+
+      //打开开关
+      this.mgStyle.isDown = true;
+
+      //设置样式
+      mg.style.cursor = 'move'
+    },
+
+    //图片移动
+    mousemoveImgHandler(event){
+      if (!this.mgStyle.isDown) {
+        return;
+      }
+      const mg = this.$refs.mg;
+
+      //获取x和y
+      let nx = event.clientX;
+      let ny = event.clientY;
+      // console.log('nx,ny', nx, ny)
+      //计算移动后 左偏移量和顶部偏移量;
+      let nl = nx - (this.mgStyle.x - this.mgStyle.l);
+      let nt = ny - (this.mgStyle.y - this.mgStyle.t);
+      const drawingBoard = this.$refs.drawingBoard;
+
+      //控制左右范围
+      let left = '0px';
+      if (nl < 0) {
+        left = '0px';
+      } else if (nl > drawingBoard.clientWidth - mg.clientWidth) {
+        left = drawingBoard.clientWidth - mg.clientWidth + 'px';
+      } else {
+        left = nl + 'px'
+      }
+      this.mgStyle.left = left;
+      let top = '0px';
+      if (nt < 0) {
+        top = '0px';
+      } else if (nt > drawingBoard.clientHeight - mg.clientHeight) {
+        top = drawingBoard.clientHeight - mg.clientHeight + 'px';
+      } else {
+        top = nt + 'px';
+      }
+      this.$store.dispatch('setPicturePosition',{top,left})
+      this.mgStyle.top = top;
+    }
+
   },
 }
 </script>
@@ -348,6 +443,7 @@ export default {
   width: 100%;
   height: 100%;
   z-index: 2;
+  overflow: hidden;
 }
 
 .dv {
@@ -360,10 +456,28 @@ export default {
   user-select: none;
 }
 
+.mg {
+  display: inline-block;
+  /*position: absolute;*/
+  /*width:30px;*/
+  /*height:30px;*/
+  background-color: #0b97c4;
+  cursor: default;
+  user-select: none;
+}
+
 .dv:hover {
 
   border: 2px orange solid;
 
+}
+
+img{
+  /*-moz-user-select: -moz-none;*/
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+  user-select: none;
 }
 
 </style>

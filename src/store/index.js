@@ -110,9 +110,16 @@ export const store = createStore({
             left:'20px',
             size:'',
             rotate:'',
-            // 图片都物理存放位置;
+            // 图片物理存放位置;
             position:'',
-        }
+        },
+        //图片数组
+        pictureArrState: {
+            //步骤
+            pictureStep: 0,
+            //字幕数组栈
+            picturesArr: [],
+        },
 
     },
 
@@ -286,7 +293,7 @@ export const store = createStore({
          */
         addSubtitleArr(state, payload) {
             const currentFragIndex = state.video.currentFragIndex;
-            console.log('niaho')
+            // console.log('niaho')
             //如果没有字幕则进行初始化
             if (!state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr) {
                 // console.log('hehe')
@@ -322,7 +329,51 @@ export const store = createStore({
             state.pictureValue.name = payload.name;
             state.pictureValue.url = payload.url;
             state.pictureValue.size = payload.size;
-        }
+            state.pictureValue.rotate = payload.rotate;
+        },
+        //设置图片的位置
+        setPicturePosition(state, payload) {
+            if (payload) {
+                state.pictureValue.left = payload.left;
+                state.pictureValue.top = payload.top;
+            }
+        },
+        //清除图片值
+        clearPictureValue(state){
+            state.pictureValue.name = '';
+            state.pictureValue.left = '20px';
+            state.pictureValue.right = '20px';
+            state.pictureValue.position = '';
+            state.pictureValue.url='';
+        },
+        //添加图片
+        addPictureArr(state, payload) {
+            //获取当前判断
+            const currentFragIndex = state.video.currentFragIndex;
+            console.log('niaho')
+            //如果没有图片则进行初始化
+            if (!state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures) {
+                // console.log('hehe')
+                state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures = [];
+            }
+
+            payload.position =   state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.length;
+
+            state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.push(deepCopy(payload));
+            // console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
+
+            //添加操作栈
+            let length = state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures .length;
+            let pictureStep = state.pictureArrState.pictureStep;
+            state.pictureArrState.picturesArr[pictureStep]={
+                fragIndex: currentFragIndex,
+                position: length - 1,
+                pictureValue: payload
+            }
+            // console.log('操作栈添加了吗',state.subtitlesArrState.subtitlesArr )
+            state.pictureArrState.pictureStep++;
+        },
+
     },
     getters: { // 相当于计算属性
     },
@@ -448,9 +499,23 @@ export const store = createStore({
         //设置图片的值
         setPictureValue(context,payload){
             context.commit('setPictureValue',payload);
-        }
+        },
+        //设置图片的位置
+        setPicturePosition(context, payload) {
+           context.commit('setPicturePosition',payload)
+        },
 
-        //
+        //清除图片值
+        clearPictureValue(context){
+            context.commit('clearInputValue');
+        },
+
+        //添加图片
+        addPictureArr(context,payload){
+            context.commit('addPictureArr',payload);
+            //添加历史记录
+            context.commit('pushHistoryOptions',options.ADD_PICTURE);
+        }
 
 
     },
