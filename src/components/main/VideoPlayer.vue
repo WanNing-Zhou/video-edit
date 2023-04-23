@@ -16,12 +16,19 @@
         <div class="drawingBoard" ref="drawingBoard" @mouseup="mouseupHandler">
           <div class="dv"
                ref="dv"
-               :style="` position:absolute;font-family:${subtitleValue.fontFamily}; color:${subtitleValue.color};font-size:${subtitleValue.fontSize};left:${dvStyle.left};top:${dvStyle.top}`"
+               :style="` position:absolute;font-family:${subtitleValue.fontFamily}; color:${subtitleValue.color};font-size:${subtitleValue.fontSize};left:${subtitleValue.left};top:${subtitleValue.top}`"
                @mousedown="mousedownHandler"
                @mousemove="mousemoveHandler"
                @mouseup="mouseupHandler"
           >{{ subtitleValue.inputValue }}
           </div>
+
+          <template v-show="subtitlesArr">
+            <div v-for="item in options"
+
+            >{{}}</div>
+          </template>
+
         </div>
         <!--        <canvas></canvas>-->
       </div>
@@ -76,12 +83,15 @@ export default {
       return store.state.videoUrl;
     })
 
+    const currentFragIndex = ref(0);
+
     const videoCurrentTime = computed(() => {
+      currentFragIndex.value = store.state.video.currentFragIndex;
       return store.state.video.videoCurrentTime;
     })
 
 
-    const {proxy} = getCurrentInstance();
+    // const {proxy} = getCurrentInstance();
 
 
     const debounceGetCurrentTime = debounce((newValue) => {
@@ -103,6 +113,7 @@ export default {
     const setCover = (event) => {//加载完成事件，调用函数
       if (videoUrl.value !== '' && videoUrl.value) {
         store.dispatch('updateVideoDuration', event.target.duration);
+        store.dispatch('addSliceFragmentArr')
         // console.log(store.state.video.videoDuration)
       }
       const videoEl = event.target;
@@ -129,6 +140,7 @@ export default {
           videoCurrentTime = videoFrag[1];
         }
       }
+
       if (videoCurrentTime > temp) {
         player.currentTime(videoCurrentTime)
       }
@@ -146,9 +158,20 @@ export default {
       let subtitle = store.state.subtitleValue;
       // console.log(subtitle)
       if (subtitle && subtitle.inputValue !== '') {
-        console.log('subtitle', subtitle.inputValue)
+        // console.log('subtitle', subtitle.inputValue)
         return subtitle;
       } else {
+        return false;
+      }
+    });
+
+    const subtitlesArr= computed(()=>{
+      const currentFragIndex = store.state.video.currentFragIndex;
+      //获取当前视频片段
+      const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
+      if(fragment && fragment.subtitleArr.length > 0){
+        return subtitlesArr;
+      }else{
         return false;
       }
 
@@ -159,6 +182,7 @@ export default {
       setCover,
       videoTimeUpdateHandler,
       subtitleValue,
+      subtitlesArr,
     }
   },
 
@@ -227,7 +251,7 @@ export default {
       //获取x和y
       let nx = event.clientX;
       let ny = event.clientY;
-      console.log('nx,ny', nx, ny)
+      // console.log('nx,ny', nx, ny)
       //计算移动后 左偏移量和顶部偏移量;
       let nl = nx - (this.dvStyle.x - this.dvStyle.l);
       let nt = ny - (this.dvStyle.y - this.dvStyle.t);
@@ -251,7 +275,10 @@ export default {
       } else {
         top = nt + 'px';
       }
+      this.$store.dispatch('setSubtitlePosition',{top,left})
       this.dvStyle.top = top;
+      // console.log(this.$store.state.subtitleValue);
+
     },
 
     //鼠标抬起事件

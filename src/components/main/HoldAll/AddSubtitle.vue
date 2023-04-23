@@ -4,7 +4,7 @@
 
     <div>
       <span>字体大小</span>
-      <el-input-number v-model="fontSizeValue" :min="8" :max="24" @change="subtitleInput"/>
+      <el-input-number v-model="fontSizeValue" :min="8" :max="46" @change="subtitleInput"/>
     </div>
 
     <div>
@@ -41,6 +41,7 @@
       <el-button
           type="primary"
           bg
+          @click="addSubtitleHandler"
       >添加字幕
       </el-button>
     </div>
@@ -50,6 +51,7 @@
 <script>
 import {ref} from 'vue'
 import {useStore} from 'vuex'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: "AddSubtitle",
@@ -114,21 +116,66 @@ export default {
     ]
 
     //字体大小
-    const fontSizeValue = ref(14)
+    const fontSizeValue = ref(24)
 
     //文本值
     const textValue = ref('')
 
     //字幕输入时触发
     const subtitleInput = ()=>{
+
+      const currentFragIndex = store.state.video.currentFragIndex;
+      // console.log(currentFragIndex)
+      // console.log(store.state.video.videoCurrentTime)
+      // console.log('片段数组',store.state.sliceFragment.sliceFragmentArr)
+      // console.log('片段',store.state.sliceFragment)
+      //在输入字幕的时候,判断当亲片段字幕数量,如果数量大于2,就不允许添加,并给出警告
+      if (store.state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr&&store.state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length>=2){
+        ElMessage({
+          showClose: true,
+          message: '仅支持添加两条字幕',
+          type: 'warning',
+        })
+        return;
+      }
+
       let inputValue = textValue.value.trim();
       if(inputValue && inputValue!==''){
-        console.log(inputValue)
+        // console.log(inputValue)
         let fontFamily = fontFamilyValue.value && fontFamilyValue.value!==''?fontFamilyValue.value:'"Microsoft Yahei"';
         let color = colorValue.value && colorValue.value!=='' ? colorValue.value : 'black';
         let fontSize = fontSizeValue.value + 'px'
         store.dispatch('setSubtitleValue',{fontFamily,color,fontSize,inputValue})
       }
+    }
+
+    //点击添加字幕的时候进行操作
+    const addSubtitleHandler = ()=>{
+      //获取当前时间片段
+      const currentFragIndex = store.state.video.currentFragIndex;
+      // console.log(currentFragIndex)
+      const subtitleArr = store.state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr;
+      if (subtitleArr&&subtitleArr.length>=2) {
+        ElMessage({
+          showClose: true,
+          message: '仅支持添加两条字幕',
+          type: 'warning',
+        })
+        return;
+      }
+      let inputValue = textValue.value.trim();
+      const subtitleValue = store.state.subtitleValue;
+      if(inputValue && inputValue!==''){
+        store.dispatch('addSubtitleArr',subtitleValue)
+      }else{
+        ElMessage({
+          showClose: true,
+          message: '字幕能为空',
+          type: 'warning',
+        })
+        return;
+      }
+      console.log(subtitleArr);
     }
 
     return {
@@ -140,6 +187,7 @@ export default {
       fontSizeValue,
       textValue,
       subtitleInput,
+      addSubtitleHandler,
 
     }
   }

@@ -107,6 +107,8 @@ export default {
 
       right = right/100.0 * totalTime.value;
 
+      console.log('right',right)
+
       store.dispatch('addSliceFragmentArr',right);
 
       //在状态中加入删除的历史记录
