@@ -8,6 +8,10 @@ const options={
     ADD_SUBTITLE:3,
     //添加贴图
     ADD_PICTURE:4,
+    //删除图片
+    DELETE_PICTURE:5,
+    //删除字幕
+    DELETE_SUBTITLE:6,
     color:{
         DELETE_COLOR : '#cc0000',
         SLICE_COLOR: '#271daf'

@@ -45,11 +45,24 @@
       >添加字幕
       </el-button>
     </div>
+    <div>
+        <div v-for="item in subtitleArr">
+          <div
+              :style="`display: inline-block;font-family:${item.fontFamily}; color:${item.color};font-size:18px;`"
+              :key="item.position"
+          >{{item.inputValue}}</div>
+          <el-button
+              type="danger"
+              text
+              @click="deleteSubtitle(item)"
+          >删除</el-button>
+        </div>
+    </div>
   </div>
 </template>
 
 <script>
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 import {useStore} from 'vuex'
 import { ElMessage } from 'element-plus'
 
@@ -185,6 +198,24 @@ export default {
       // console.log(subtitleArr);
     }
 
+    //获取当前片段的字幕数组
+    const subtitleArr= computed(()=>{
+      const currentFragIndex = store.state.video.currentFragIndex;
+      //获取当前视频片段
+      const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
+      if(fragment && fragment.subtitleArr && fragment.subtitleArr.length > 0){
+        // console.log(fragment.subtitleArr)
+        return fragment.subtitleArr;
+      }else{
+        return [];
+      }
+    })
+
+    const deleteSubtitle = (subtitleValue)=>{
+      // console.log('subtitleValue',subtitleValue)
+      store.dispatch('deleteSubtitle',subtitleValue)
+    }
+
     return {
       colorValue,
       predefineColors,
@@ -195,7 +226,8 @@ export default {
       textValue,
       subtitleInput,
       addSubtitleHandler,
-
+      deleteSubtitle,
+      subtitleArr
     }
   }
 }

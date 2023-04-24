@@ -16,7 +16,7 @@
         <div class="drawingBoard" ref="drawingBoard" @mouseup="mouseupHandler">
           <div class="dv"
                ref="dv"
-               :style="` position:absolute;font-family:${subtitleValue.fontFamily}; color:${subtitleValue.color};font-size:${subtitleValue.fontSize};left:${subtitleValue.left};top:${subtitleValue.top}`"
+               :style="` position:absolute;font-family:${subtitleValue.fontFamily}; color:${subtitleValue.color};font-size:${subtitleValue.fontSize};left:${subtitleValue.left};top:${subtitleValue.top};`"
                @mousedown="mousedownHandler"
                @mousemove="mousemoveHandler"
                @mouseup="mouseupHandler"
@@ -24,7 +24,7 @@
           </div>
 
             <div v-for=" item in subtitleArr"
-                 :style="`position:absolute;font-family:${item.fontFamily}; color:${item.color};font-size:${item.fontSize};left:${item.left};top:${item.top};z-index:1;`"
+                 :style="`user-select:none;position:absolute;font-family:${item.fontFamily}; color:${item.color};font-size:${item.fontSize};left:${item.left};top:${item.top};z-index:1;`"
                  :key="item.position"
             >{{item.inputValue}}</div>
 
@@ -43,7 +43,7 @@
           <img
               v-for="item in pictures"
               :src="item.url"
-              :style="`user-select:none;display:inline-block;position:absolute;left:${item.left};top:${item.top};z-index:2;width:${item.size};transform:rotate(${item.rotate});`"
+              :style="`user-select:none;display:inline-block;position:absolute;left:${item.left};top:${item.top};z-index:1;width:${item.size};transform:rotate(${item.rotate});`"
               draggable="false"
           >
         </div>
@@ -509,6 +509,7 @@ export default {
   /*background-color: #0b97c4;*/
   cursor: default;
   user-select: none;
+  z-index: 2;
 }
 
 .mg {
@@ -519,6 +520,7 @@ export default {
   background-color: #0b97c4;
   cursor: default;
   user-select: none;
+  z-index: 2;
 }
 
 .dv:hover {

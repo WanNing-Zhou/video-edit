@@ -67,7 +67,7 @@ export default {
     },500,true)
 
      const valueChange = ()=>{
-       console.log('我踏马来啦')
+       // console.log('我踏马来啦')
        let time =value.value[1]  *totalTime.value /100;
 
        store.dispatch('upDateCurrentTimeValue',time)

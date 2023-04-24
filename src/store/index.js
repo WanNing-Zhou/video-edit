@@ -63,10 +63,15 @@ export const store = createStore({
 
         //字幕数组
         subtitlesArrState: {
+            //用于字幕添加的时候为字幕添加id
+            id:0,
             //步骤
             subtitleStep: 0,
             //字幕数组栈
             subtitlesArr: [],
+            //字幕删除步骤
+            delStep:[],
+            delSubtitleArr:[]
         },
 
         // 切片信息
@@ -100,6 +105,8 @@ export const store = createStore({
             left: '20px',
             // 字幕的物理存储位置(用于后期对字幕的修改和删除)
             position:'', //存放存放位置用来确定
+            // 字幕的唯一标识
+            id:'',
         },
 
         //贴图(有些属性不知道能不能实现,咱得先有)
@@ -112,13 +119,22 @@ export const store = createStore({
             rotate:'',
             // 图片物理存放位置;
             position:'',
+            //图片的标识
+            id:'',
         },
         //图片数组
         pictureArrState: {
+            //在添加的时候为图片附加id
+            id:0,
             //步骤
             pictureStep: 0,
             //字幕数组栈
             picturesArr: [],
+
+            //删除步骤
+            delPicStep:0,
+            // 图片删除栈
+            delPicArr:[],
         },
 
         //更新视频时间
@@ -307,7 +323,7 @@ export const store = createStore({
             }
 
             payload.position =   state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length;
-
+            payload.id = state.subtitlesArrState.id++;
             state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.push(deepCopy(payload));
             // console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
 
@@ -326,8 +342,9 @@ export const store = createStore({
         clearInputValue(state){
             state.subtitleValue.inputValue = '';
             state.subtitleValue.left = '20px';
-            state.subtitleValue.right = '20px';
+            state.subtitleValue.top = '20px';
             state.subtitleValue.position = '';
+            state.subtitleValue.id = '';
 
         },
         //设置图片值
@@ -348,9 +365,10 @@ export const store = createStore({
         clearPictureValue(state){
             state.pictureValue.name = '';
             state.pictureValue.left = '20px';
-            state.pictureValue.right = '20px';
+            state.pictureValue.top = '20px';
             state.pictureValue.position = '';
             state.pictureValue.url='';
+            state.pictureValue.id = ''
         },
         //添加图片
         addPictureArr(state, payload) {
@@ -364,12 +382,13 @@ export const store = createStore({
             }
 
             payload.position =   state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.length;
-
+            //分配id
+            payload.id = state.pictureArrState.id++;
             state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.push(deepCopy(payload));
             // console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
 
             //添加操作栈
-            let length = state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures .length;
+            let length = state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.length;
             let pictureStep = state.pictureArrState.pictureStep;
             state.pictureArrState.picturesArr[pictureStep]={
                 fragIndex: currentFragIndex,
@@ -380,6 +399,39 @@ export const store = createStore({
             state.pictureArrState.pictureStep++;
         },
 
+        //图片删除操作;
+        //传递的是当前图片的value
+        deletePicture(state,payload){
+          const id = payload.id;
+          const currentFragIndex = state.video.currentFragIndex;
+          let position = '';
+          const pictures =   state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures;
+          for(let i = 0; i < pictures.length; i++){
+              if(id === pictures[i].id){
+                  position = i;
+                  state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.splice(i,1);
+                  break;
+              }
+          }
+          state.pictureArrState.delPicArr[state.pictureArrState.delPicStep++] = deepCopy(payload);
+        },
+
+        //字幕删除操作;
+        //传递的是当前字幕的value
+        deleteSubtitle(state,payload){
+            const id = payload.id;
+            const currentFragIndex = state.video.currentFragIndex;
+            let position = '';
+            const subtitleArr =  state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr;
+            for(let i = 0; i < subtitleArr.length; i++){
+                if(id === subtitleArr[i].id){
+                    position = i;
+                    state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.splice(i,1);
+                    break;
+                }
+            }
+            state.subtitlesArrState.delSubtitleArr[state.subtitlesArrState.delStep++] = deepCopy(payload);
+        },
 
         //是否更新视频时间
         isUpdateCurrentTime(state,payload){
@@ -387,7 +439,7 @@ export const store = createStore({
         },
         //改变视频时间
         upDateCurrentTimeValue(state,payload){
-            state.UpdateCurrentTime.timeValue = payload
+            state.UpdateCurrentTime.timeValue = deepCopy(payload)
         },
 
     },
@@ -542,9 +594,17 @@ export const store = createStore({
         upDateCurrentTimeValue(context,payload){
             context.commit('upDateCurrentTimeValue',payload);
         },
+        //删除贴图操作
+        deletePicture(context,payload){
+            context.commit('deletePicture',payload);
+            context.commit('pushHistoryOptions',options.DELETE_PICTURE)
+        },
 
-
-
+        //删除字幕操作
+        deleteSubtitle(context,payload){
+            context.commit('deleteSubtitle',payload);
+            context.commit('pushHistoryOptions',options.DELETE_SUBTITLE)
+        }
 
     },
     modules: {// 拆分模块
