@@ -156,7 +156,7 @@ export const store = createStore({
         updateVideoCurrentTime(state, payload) {
             state.video.videoCurrentTime = payload;
             const fragArr = state.sliceFragment.sliceFragmentArr;
-            console.log('fragArr',fragArr);
+            // console.log('fragArr',fragArr);
             //更新当前所在片段
             for (let i = 0; i < fragArr.length; i++) {
                 let frag = fragArr[i].frag;
@@ -507,7 +507,7 @@ export const store = createStore({
 
         //清除图片值
         clearPictureValue(context){
-            context.commit('clearInputValue');
+            context.commit('clearPictureValue');
         },
 
         //添加图片

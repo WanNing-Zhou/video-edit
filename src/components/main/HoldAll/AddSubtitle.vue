@@ -181,7 +181,6 @@ export default {
           message: '字幕不能能为空',
           type: 'warning',
         })
-        return;
       }
       // console.log(subtitleArr);
     }

@@ -39,6 +39,13 @@
               @mousemove="mousemoveImgHandler"
               @mouseup="mouseupHandler"
           >
+
+          <img
+              v-for="item in pictures"
+              :src="item.url"
+              :style="`user-select:none;display:inline-block;position:absolute;left:${item.left};top:${item.top};z-index:2;width:${item.size};transform:rotate(${item.rotate});`"
+              draggable="false"
+          >
         </div>
         <!--        <canvas></canvas>-->
       </div>
@@ -205,6 +212,20 @@ export default {
       }
     })
 
+    // 获取当前片段的贴图数组
+
+    const pictures = computed(()=>{
+      // 当前视频片段位置
+      const currentFragIndex = store.state.video.currentFragIndex;
+      // 获取当前视频片段
+      const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
+      if(fragment && fragment.pictures && fragment.pictures.length > 0){
+        return fragment.pictures;
+      }else {
+        return [];
+      }
+    })
+
 
     return {
       videoUrl,
@@ -212,7 +233,8 @@ export default {
       videoTimeUpdateHandler,
       subtitleValue,
       subtitleArr,
-      pictureValue
+      pictureValue,
+      pictures
     }
   },
 

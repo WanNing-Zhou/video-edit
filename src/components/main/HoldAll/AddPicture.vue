@@ -51,10 +51,11 @@
 
 <script>
 
-import {ref,reactive} from 'vue'
+import {ref, reactive,watch, computed} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {useStore} from 'vuex'
 import { Plus } from '@element-plus/icons-vue'
+import deepCopy from "@/utils/deepCopy";
 
 export default {
   name: "AddPicture",
@@ -83,6 +84,7 @@ export default {
       )
     }
 
+
     const beforeRemove = (uploadFile, uploadFiles) => {
       console.log(uploadFile,uploadFiles)
       return ElMessageBox.confirm(
@@ -98,8 +100,7 @@ export default {
     let name = '';
     // 照片路径
     let url = '';
-    //选择文件操作
-
+    //在vuex中更新pictureValue的值
     const setPictureValue = ()=>{
       // console.log(`进入了`,name,url)
       if(name&&name!==''&&url&&url!==''){
@@ -110,12 +111,22 @@ export default {
       }
 
     }
+    //文件按选择
     const handleFileSelect = () => {
       // console.log(fileInput.value)
+      if (pictures&&pictures.length>=2) {
+        ElMessage({
+          showClose: true,
+          message: '仅支持添加3张图片',
+          type: 'warning',
+        })
+        return;
+      }
       const file = document.getElementById('fileInput').files[0];
-      name = file.name;//读取选中文件的文件名
+
       console.log(name,file)
       if(file){
+        name = file.name;//读取选中文件的文件名
         url = URL.createObjectURL(file);
         imgList.value.push({
           name,
@@ -127,11 +138,61 @@ export default {
       }
     }
 
+    //添加图片操作
+    const addPictureHandler = async ()=>{
+      //获取当前视频片段
+      const currentFragIndex = store.state.video.currentFragIndex;
+      const pictures = store.state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures;
+      if (pictures&&pictures.length>=2) {
+        ElMessage({
+          showClose: true,
+          message: '仅支持添加3张图片',
+          type: 'warning',
+        })
+        return;
+      }
+      //获取当前vuex中的值
+      const pictureValue = store.state.pictureValue;
 
-
-    const addPictureHandler = ()=>{
-
+      if(pictureValue && pictureValue!==''){
+        await store.dispatch('addPictureArr',pictureValue)
+        name = '';
+        url = '';
+        console.log( store.state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures)
+        //添加后清除vuex中的pictureValue
+        await store.dispatch('clearPictureValue')
+        ElMessage({
+          showClose: true,
+          message: '添加贴图成功',
+          type: 'success',
+        })
+      }else{
+        ElMessage({
+          showClose: true,
+          message: '贴图不能能为空',
+          type: 'warning',
+        })
+      }
     }
+
+    // 获取当前片段的贴图数组
+
+    const pictures = computed(()=>{
+      // 当前视频片段位置
+      const currentFragIndex = store.state.video.currentFragIndex;
+      // 获取当前视频片段
+      const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
+      if(fragment && fragment.pictures && fragment.pictures.length > 0){
+        return fragment.pictures;
+      }else {
+        return [];
+      }
+    })
+
+
+    watch(pictures,()=>{
+      imgList.value = deepCopy(pictures.value);
+    })
 
     return {
       pictureRotateValue,
