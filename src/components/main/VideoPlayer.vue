@@ -257,6 +257,20 @@ export default {
     })
 
 
+    const urlHandler=(file) =>{
+
+      let url;
+      url = URL.createObjectURL(file);
+
+      // let binaryData = [];
+      // binaryData.push(file);
+      // // if(!url || url === ''){
+      //   url = window.URL.createObjectURL(new Blob(binaryData));
+      // // }
+       return url
+    }
+
+
     return {
       videoUrl,
       setCover,
@@ -267,7 +281,8 @@ export default {
       pictures,
       volume,
       volumeChange,
-      toStartTime
+      toStartTime,
+      urlHandler
     }
   },
 

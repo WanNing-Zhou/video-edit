@@ -2,14 +2,13 @@
 <div class="navbar">
     <el-row class="tac" >
       <el-col :span="12">
-        <h5 class="mb-2">视频剪辑</h5>
+        <h2 class="mb-2">视频剪辑</h2>
         <el-menu
             active-text-color="#ffd04b"
             background-color="#545c64"
             class="el-menu-vertical-demo"
             default-active="1"
             text-color="#fff"
-            @open="handleOpen"
             @close="handleClose"
         >
           <el-menu-item index="1" ref="refMenuItem1" @click="changePage('updateSelectMediaVisible')">
@@ -51,20 +50,12 @@ export default {
     const store = useStore();
     const changePage = (mutation)=>{
       store.dispatch(mutation,true); // 更改页面可见性
-      console.log(store.state.IsVisible)
-    }
-
-    const handleOpen = (key, keyPath) => {
-      console.log(key, keyPath)
-    }
-    const handleClose = (key, keyPath) => {
-      console.log(key, keyPath)
+      // console.log(store.state.IsVisible)
     }
 
     return{
       changePage,
-      handleClose,
-      handleOpen
+
     }
   }
 }

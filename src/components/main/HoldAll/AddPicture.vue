@@ -33,7 +33,6 @@
         :auto-upload="false"
         :on-preview="handlePreview"
         :on-remove="handleRemove"
-        :before-remove="beforeRemove"
         :limit="3"
         :on-exceed="handleExceed"
     >
@@ -68,7 +67,7 @@ export default {
 
     //删除操作
     const handleRemove = (file, uploadFiles) => {
-      // console.log('remove执行了',file)
+      console.log('remove执行了',file)
       // console.log(file, uploadFiles)
       store.dispatch('deletePicture',file);
     }
@@ -87,7 +86,7 @@ export default {
 
 
     const beforeRemove = (uploadFile, uploadFiles) => {
-      console.log(uploadFile, uploadFiles)
+      // console.log(uploadFile, uploadFiles)
       return ElMessageBox.confirm(
           `Cancel the transfer of ${uploadFile.name} ?`
       ).then(
@@ -101,17 +100,21 @@ export default {
     let name = '';
     // 照片路径
     let url = '';
+    let file = '';
     //在vuex中更新pictureValue的值
     const setPictureValue = () => {
       // console.log(`进入了`,name,url)
       if (name && name !== '' && url && url !== '') {
         let size = pictureSizeValue.value + 'px';
         let rotate = pictureRotateValue.value + 'deg';
-        store.dispatch('setPictureValue', {name, url, size, rotate})
-        console.log('pic', store.state.pictureValue)
+        store.dispatch('setPictureValue', {name, url, size, rotate, file})
+        // console.log('pic', store.state.pictureValue)
       }
 
     }
+
+    const urlList = ref([]);
+    const FL = ref([]);
     //文件按选择
     const handleFileSelect = () => {
       // console.log(fileInput.value)
@@ -125,13 +128,24 @@ export default {
       }
       const file = document.getElementById('fileInput').files[0];
 
-      console.log(name, file)
+      // console.log(name, file)
       if (file) {
         name = file.name;//读取选中文件的文件名
         url = URL.createObjectURL(file);
+
+        let binaryData = [];
+        binaryData.push(file);
+        if(!url || url === ''){
+          url = window.URL.createObjectURL(new Blob(binaryData));
+        }
+
+        // console.log(url)
+        urlList.value.push(url);
+        FL.value.push(file)
         imgList.value.push({
           name,
           url,
+          file
         })
 
         setPictureValue()
@@ -144,7 +158,7 @@ export default {
       //获取当前视频片段
       const currentFragIndex = store.state.video.currentFragIndex;
       const pictures = store.state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures;
-      if (pictures && pictures.length >= 2) {
+      if (pictures && pictures.length >= 3) {
         ElMessage({
           showClose: true,
           message: '仅支持添加3张图片',
@@ -155,11 +169,11 @@ export default {
       //获取当前vuex中的值
       const pictureValue = store.state.pictureValue;
 
-      if (pictureValue && pictureValue !== '') {
+      if (pictureValue && pictureValue.url !== '' && pictureValue.name !== '') {
         await store.dispatch('addPictureArr', pictureValue)
         name = '';
         url = '';
-        console.log(store.state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures)
+        // console.log(store.state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures)
         //添加后清除vuex中的pictureValue
         await store.dispatch('clearPictureValue')
         ElMessage({
@@ -177,7 +191,6 @@ export default {
     }
 
     // 获取当前片段的贴图数组
-
     const pictures = computed(() => {
       // 当前视频片段位置
       const currentFragIndex = store.state.video.currentFragIndex;
@@ -190,9 +203,9 @@ export default {
       }
     })
 
-
     watch(pictures, () => {
       imgList.value = deepCopy(pictures.value);
+      // console.log(pictures.value)
     })
 
     return {

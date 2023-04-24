@@ -1,7 +1,7 @@
 //用来存储全局操作的枚举
 const options={
-    //删除操作
-    DELETE:1,
+    //删除片段操作
+    DELETE_FRAG:1,
     //切片操作
     SLICE:2,
     //添加字幕

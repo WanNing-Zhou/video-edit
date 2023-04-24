@@ -5,7 +5,7 @@
     <el-scrollbar>
       <div class="util-bar">
         <!-- 这里需存放各种工具     -->
-        <el-icon class="util-icon" title="撤销"><RefreshLeft /></el-icon>
+        <el-icon class="util-icon" title="撤销" @click="backHistory"><RefreshLeft /></el-icon>
         <el-icon class="util-icon" title="分割" @click="sliceFragment"><Scissor /></el-icon>
         <el-icon class="util-icon" title="删除" @click="deleteFragment" ><Delete/></el-icon>
         <el-icon class="util-icon" title="导出" @click="centerDialogVisible = true"><Download /></el-icon>
@@ -16,7 +16,6 @@
         <!-- 视频进度条     -->
         <video-input-bar></video-input-bar>
       </div>
-
     </el-scrollbar>
 
     <el-dialog
@@ -42,7 +41,7 @@
 </template>
 
 <script>
-import {onMounted, computed, watch, ref,reactive,getCurrentInstance} from "vue";
+import {onMounted, computed, watch, ref,reactive,getCurrentInstance,onBeforeUnmount} from "vue";
 import {useStore} from "vuex";
 import {SemiSelect,Delete,RefreshLeft,Download,Scissor} from '@element-plus/icons-vue'
 import VideoInputBar from "@/components/main/videoTrack/VideoInputBar";
@@ -93,7 +92,7 @@ export default {
     const deleteFragment= ()=>{
 
       let inputBarValue = [store.state.videTrack.inputBarValue['0'],store.state.videTrack.inputBarValue['1']];
-      console.log(inputBarValue)
+      // console.log(inputBarValue)
       let temp = 0;
       let left = inputBarValue[0];
       let right = inputBarValue[1];
@@ -108,6 +107,8 @@ export default {
 
       // console.log('删除的片段',[left,right])
       store.dispatch('pushDeleteOptions',[left,right]);
+      console.log('hh',store.state.history)
+      console.log('history',store.state.history.videoInputBarMarksArr)
 
       //在状态中加入删除的历史记录
       ElMessage({
@@ -143,13 +144,44 @@ export default {
     //对话框显示
     const centerDialogVisible = ref(false);
 
+    //历史记录回退功能
+    const backHistory = ()=>{
+      const historyStep = store.state.history.historyOptionStep;
+      if(historyStep === 0 || !historyStep){
+        ElMessage({
+          message: '不能再回退了,再回退就报错啦!!!',
+          type: 'warning',
+        })
+        return
+      }
+      // console.log('进入了历史记录回退');
+      // console.log(store.state.deleteOptions)
+      store.dispatch('backHistory')
+      // console.log(store.state.history)
+      // console.log(store.state.videTrack.videoInputBarMarks)
+    }
+
+    const backHandler = (e)=>{
+      if(e.ctrlKey&&e.key==='z'){
+        backHistory();
+      }
+    }
+    onMounted(()=>{
+      document.addEventListener('keydown',backHandler)
+    })
+
+    onBeforeUnmount(()=>{
+      document.removeEventListener('keydown',backHandler);
+    })
+
     return {
       progressWidth,
       videoCurrentTime,
       totalTime,
       deleteFragment,
       sliceFragment,
-      centerDialogVisible
+      centerDialogVisible,
+      backHistory
     }
   }
 }

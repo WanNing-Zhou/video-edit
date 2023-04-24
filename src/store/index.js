@@ -50,12 +50,16 @@ export const store = createStore({
         //用来保存历史操作
         history: {
             historyOptionsArr: [],
-            historyOptionStep: [],
-            videoInputBarMarksArr: [],
+            historyOptionStep: 0,
+            videoInputBarMarksArr: [{
+                '0': {style: {color: '#81e35b', fontWeight: '700'}, label: '0.00s'},
+                '100': {style: {color: '#0ede30', fontWeight: '700'}, label: '100%'},
+            }],
         },
         //用来保存当前操作
         currentWork: {},
-        //删除操作栈
+
+        //删除片段操作栈
         deleteOptions: {
             optionStep: 0,
             optionArr: []
@@ -64,14 +68,14 @@ export const store = createStore({
         //字幕数组
         subtitlesArrState: {
             //用于字幕添加的时候为字幕添加id
-            id:0,
+            id: 0,
             //步骤
             subtitleStep: 0,
             //字幕数组栈
             subtitlesArr: [],
             //字幕删除步骤
-            delStep:[],
-            delSubtitleArr:[]
+            delStep: 0,
+            delSubtitleArr: []
         },
 
         // 切片信息
@@ -104,43 +108,44 @@ export const store = createStore({
             top: '20px',
             left: '20px',
             // 字幕的物理存储位置(用于后期对字幕的修改和删除)
-            position:'', //存放存放位置用来确定
+            position: '', //存放存放位置用来确定
             // 字幕的唯一标识
-            id:'',
+            id: '',
         },
 
         //贴图(有些属性不知道能不能实现,咱得先有)
-        pictureValue:{
-            name:'',
-            url:'',
-            top:'20px',
-            left:'20px',
-            size:'',
-            rotate:'',
+        pictureValue: {
+            name: '',
+            url: '',
+            top: '20px',
+            left: '20px',
+            size: '',
+            rotate: '',
             // 图片物理存放位置;
-            position:'',
+            position: '',
             //图片的标识
-            id:'',
+            id: '',
+            file:'',
         },
         //图片数组
         pictureArrState: {
             //在添加的时候为图片附加id
-            id:0,
+            id: 0,
             //步骤
             pictureStep: 0,
-            //字幕数组栈
+            //图片添加栈栈
             picturesArr: [],
 
             //删除步骤
-            delPicStep:0,
+            delPicStep: 0,
             // 图片删除栈
-            delPicArr:[],
+            delPicArr: [],
         },
 
         //更新视频时间
-        UpdateCurrentTime:{
-            isUpdateCurrentTime:false,
-            timeValue:0
+        UpdateCurrentTime: {
+            isUpdateCurrentTime: false,
+            timeValue: 0
         },
 
     },
@@ -209,11 +214,9 @@ export const store = createStore({
                         }*/
             state.deleteOptions.optionArr[state.deleteOptions.optionStep] = payload;
             state.deleteOptions.optionStep++;
-
-
         },
         //回退操作
-        backDeleteOptions(state, payload) {
+        backDeleteOptions(state) {
             state.deleteOptions.optionStep--;
         },
 
@@ -222,7 +225,6 @@ export const store = createStore({
             let step = state.history.historyOptionStep;
             state.history.historyOptionsArr[step] = payload //在历史记录中添加记录
             state.history.historyOptionStep++;
-
         },
         //更新进度条
         updateInputBarValue(state, payload) {
@@ -232,11 +234,13 @@ export const store = createStore({
         //添加进度条状态
         addVideoInputBarMarks(state, payload) {
             let mark = deepCopy(state.videTrack.videoInputBarMarks);
-            mark = {...mark, ...payload};
+            let m = deepCopy(mark)
+            let p = deepCopy(payload);
+            mark = {...m, ...p};
             state.videTrack.videoInputBarMarks = mark;
 
             let step = state.history.historyOptionStep;
-            state.history.videoInputBarMarksArr[step - 1] = mark;
+            state.history.videoInputBarMarksArr[step] = deepCopy(mark);
         },
 
         //添加切片
@@ -260,17 +264,22 @@ export const store = createStore({
                         state.sliceFragment.sliceFragmentArr[i].frag = [fragment[0], payload];
                         // console.log('frag', state.sliceFragment.sliceFragmentArr[i].frag)
                         //在当前位置后添加一个新的片段
-                        state.sliceFragment.sliceFragmentArr.splice(i + 1, 0, {...fragCopy,frag: [payload, fragment[1]]});
+                        state.sliceFragment.sliceFragmentArr.splice(i + 1, 0, {
+                            ...fragCopy,
+                            frag: [payload, fragment[1]]
+                        });
                         // console.log()
                         //操作进栈
                         // 操作的片段进栈,回退的时候可以根据时间来连接两个片段
-                        state.sliceFragment.sliceStepArr[sliceStep] = payload;
+                        state.sliceFragment.sliceStepArr[state.sliceFragment.sliceStep++] = payload;
+                        console.log('state.sliceFragment.sliceStep', state.sliceFragment.sliceStep)
                         break; //跳出循环
                     }
                 }
+                // state.sliceFragment.sliceStep++;
             }
             // console.log('slicArr', state.sliceFragment.sliceFragmentArr)
-            state.sliceFragment.sliceStep++;
+
         },
 
 
@@ -322,15 +331,16 @@ export const store = createStore({
                 state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr = [];
             }
 
-            payload.position =   state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length;
+            payload.position = state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length;
             payload.id = state.subtitlesArrState.id++;
+            payload.fragIndex = currentFragIndex;
             state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.push(deepCopy(payload));
             // console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
 
             //添加操作栈
             let length = state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.length;
             let subtitleStep = state.subtitlesArrState.subtitleStep;
-            state.subtitlesArrState.subtitlesArr[subtitleStep]={
+            state.subtitlesArrState.subtitlesArr[subtitleStep] = {
                 fragIndex: currentFragIndex,
                 position: length - 1,
                 subtitleValue: payload
@@ -339,7 +349,7 @@ export const store = createStore({
             state.subtitlesArrState.subtitleStep++;
         },
         //清空输入值
-        clearInputValue(state){
+        clearInputValue(state) {
             state.subtitleValue.inputValue = '';
             state.subtitleValue.left = '20px';
             state.subtitleValue.top = '20px';
@@ -348,7 +358,7 @@ export const store = createStore({
 
         },
         //设置图片值
-        setPictureValue(state,payload){
+        setPictureValue(state, payload) {
             state.pictureValue.name = payload.name;
             state.pictureValue.url = payload.url;
             state.pictureValue.size = payload.size;
@@ -362,35 +372,35 @@ export const store = createStore({
             }
         },
         //清除图片值
-        clearPictureValue(state){
+        clearPictureValue(state) {
             state.pictureValue.name = '';
             state.pictureValue.left = '20px';
             state.pictureValue.top = '20px';
             state.pictureValue.position = '';
-            state.pictureValue.url='';
+            state.pictureValue.url = '';
             state.pictureValue.id = ''
         },
         //添加图片
         addPictureArr(state, payload) {
             //获取当前判断
             const currentFragIndex = state.video.currentFragIndex;
-            console.log('niaho')
+            // console.log('niaho')
             //如果没有图片则进行初始化
             if (!state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures) {
-                // console.log('hehe')
                 state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures = [];
             }
 
-            payload.position =   state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.length;
+            payload.position = state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.length;
             //分配id
             payload.id = state.pictureArrState.id++;
+            payload.fragIndex = currentFragIndex;
             state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.push(deepCopy(payload));
             // console.log('字幕添加了吗',state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr)
 
             //添加操作栈
             let length = state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.length;
             let pictureStep = state.pictureArrState.pictureStep;
-            state.pictureArrState.picturesArr[pictureStep]={
+            state.pictureArrState.picturesArr[pictureStep] = {
                 fragIndex: currentFragIndex,
                 position: length - 1,
                 pictureValue: payload
@@ -401,47 +411,184 @@ export const store = createStore({
 
         //图片删除操作;
         //传递的是当前图片的value
-        deletePicture(state,payload){
-          const id = payload.id;
-          const currentFragIndex = state.video.currentFragIndex;
-          let position = '';
-          const pictures =   state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures;
-          for(let i = 0; i < pictures.length; i++){
-              if(id === pictures[i].id){
-                  position = i;
-                  state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.splice(i,1);
-                  break;
-              }
-          }
-          state.pictureArrState.delPicArr[state.pictureArrState.delPicStep++] = deepCopy(payload);
+        deletePicture(state, payload) {
+            const id = payload.id;
+            const currentFragIndex = state.video.currentFragIndex;
+            let position = '';
+            const pictures = state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures;
+            for (let i = 0; i < pictures.length; i++) {
+                if (id === pictures[i].id) {
+                    position = i;
+                    state.sliceFragment.sliceFragmentArr[currentFragIndex].pictures.splice(i, 1);
+                    break;
+                }
+            }
+            // console.log('pic', state.pictureA)
+            state.pictureArrState.delPicArr[state.pictureArrState.delPicStep] = deepCopy(payload);
+            state.pictureArrState.delPicStep++
+            console.log('addstep',state.pictureArrState.delPicStep)
         },
 
         //字幕删除操作;
         //传递的是当前字幕的value
-        deleteSubtitle(state,payload){
+        deleteSubtitle(state, payload) {
             const id = payload.id;
             const currentFragIndex = state.video.currentFragIndex;
             let position = '';
-            const subtitleArr =  state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr;
-            for(let i = 0; i < subtitleArr.length; i++){
-                if(id === subtitleArr[i].id){
+            const subtitleArr = state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr;
+            for (let i = 0; i < subtitleArr.length; i++) {
+                if (id === subtitleArr[i].id) {
                     position = i;
-                    state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.splice(i,1);
+                    state.sliceFragment.sliceFragmentArr[currentFragIndex].subtitleArr.splice(i, 1);
                     break;
                 }
             }
             state.subtitlesArrState.delSubtitleArr[state.subtitlesArrState.delStep++] = deepCopy(payload);
+            console.log(state.subtitlesArrState.delStep)
         },
 
         //是否更新视频时间
-        isUpdateCurrentTime(state,payload){
-            state.UpdateCurrentTime.isUpdateCurrentTime= payload;
+        isUpdateCurrentTime(state, payload) {
+            state.UpdateCurrentTime.isUpdateCurrentTime = payload;
         },
         //改变视频时间
-        upDateCurrentTimeValue(state,payload){
+        upDateCurrentTimeValue(state, payload) {
             state.UpdateCurrentTime.timeValue = deepCopy(payload)
         },
 
+        //回退历史记录
+        backHistory(state) {
+            let historyStep;
+            if (state.history.historyOptionStep > 0) {
+                historyStep = --state.history.historyOptionStep;
+            } else {
+                historyStep = 0;
+            }
+            switch (state.history.historyOptionsArr[historyStep]) {
+                case options.DELETE_FRAG:
+                    state.deleteOptions.optionStep--;
+                    //如果想要前进功能可以把这里去掉
+                    state.deleteOptions.optionArr.pop();
+                    state.videTrack.videoInputBarMarks = deepCopy(state.history.videoInputBarMarksArr[historyStep]);
+                    break;
+                case options.SLICE: {
+
+                    const sliceStep = --state.sliceFragment.sliceStep;
+                    const time = state.sliceFragment.sliceStepArr[sliceStep];
+                    const sliceFragmentArr = state.sliceFragment.sliceFragmentArr;
+                    // console.log('sliceStep',sliceStep)
+                    // console.log('time',time)
+                    // console.log('sliceStepArr', state.sliceFragment.sliceStepArr)
+                    // console.log('sliceFragmentArr',sliceFragmentArr)
+                    for (let i = 0; i < sliceFragmentArr.length; i++) {
+                        let left = sliceFragmentArr[i].frag[0];
+                        let right = sliceFragmentArr[i + 1].frag[1];
+                        if (time > left && time < right) {
+                            let frag = [left, right];
+                            state.sliceFragment.sliceFragmentArr[i] = deepCopy({...sliceFragmentArr[i], ...sliceFragmentArr[i]});
+                            state.sliceFragment.sliceFragmentArr[i].frag = frag;
+                            //对后一个片段进行删除
+                            state.sliceFragment.sliceFragmentArr.splice(i + 1, 1);
+                            state.videTrack.videoInputBarMarks = deepCopy(state.history.videoInputBarMarksArr[historyStep]);
+                            break;
+                        }
+                    }
+                    break;
+
+                }
+
+                case options.ADD_PICTURE: {
+                    /**
+                     * fragIndex: currentFragIndex,
+                     * position: length - 1,
+                     * pictureValue: payload
+                     */
+                    const pictureStep = --state.pictureArrState.pictureStep;
+                    const {fragIndex, position} = state.pictureArrState.picturesArr[pictureStep];
+                    state.sliceFragment.sliceFragmentArr[fragIndex].pictures.splice(position, 1);
+                    if (fragIndex !== state.video.currentFragIndex) {
+                        //更改目前视频时间
+                        state.UpdateCurrentTime.isUpdateCurrentTime = true;
+                        state.UpdateCurrentTime.timeValue = state.sliceFragment.sliceFragmentArr[fragIndex].frag[0] + 0.1;
+
+                        //页面跳转
+                        state[state.IsVisible] = false;
+                        state.addPictureVisible = true;
+                        state.IsVisible = 'addPictureVisible';
+                    }
+
+                    break;
+                }
+
+
+                case options.ADD_SUBTITLE: {
+                    const subtitleStep = --state.subtitlesArrState.subtitleStep;
+                    const {fragIndex, position} = state.subtitlesArrState.subtitlesArr[subtitleStep]
+                    // console.log('subtittlesState',state.subtitlesArrState)
+                    // console.log(subtitleStep)
+                    // console.log('fraindex',fragIndex,'position',position)
+                    state.sliceFragment.sliceFragmentArr[fragIndex].subtitleArr.splice(position, 1);
+
+                    if (fragIndex !== state.video.currentFragIndex) {
+                        //更改目前视频时间
+                        state.UpdateCurrentTime.isUpdateCurrentTime = true;
+                        state.UpdateCurrentTime.timeValue = state.sliceFragment.sliceFragmentArr[fragIndex].frag[0] + 0.1;
+
+                        //页面跳转
+                        state[state.IsVisible] = false;
+                        state.addSubtitleVisible = true;
+                        state.IsVisible = 'addSubtitleVisible';
+                    }
+                    break;
+                }
+
+                case options.DELETE_SUBTITLE: {
+                    // console.log('subTlsetp',state.subtitlesArrState.delStep)
+                    const delStep = --state.subtitlesArrState.delStep;
+                    const subTitleValue = state.subtitlesArrState.delSubtitleArr[delStep];
+                    const {fragIndex, position} = subTitleValue;
+                    // console.log('state',state.subtitlesArrState)
+                    // console.log('subva',subTitleValue)
+                    // console.log('frind',fragIndex)
+                    // console.log('pos',position)
+                    state.sliceFragment.sliceFragmentArr[fragIndex].subtitleArr.splice(position, 0, deepCopy(subTitleValue));
+                    if (fragIndex !== state.video.currentFragIndex) {
+                        //更改目前视频时间
+                        state.UpdateCurrentTime.isUpdateCurrentTime = true;
+                        state.UpdateCurrentTime.timeValue = state.sliceFragment.sliceFragmentArr[fragIndex].frag[0] + 0.1;
+
+                        //页面跳转
+                        state[state.IsVisible] = false;
+                        state.addSubtitleVisible = true;
+                        state.IsVisible = 'addSubtitleVisible';
+                    }
+                    break;
+                }
+
+                case options.DELETE_PICTURE: {
+                    const delStep = --state.pictureArrState.delPicStep;
+                    const pictureValue = state.pictureArrState.delPicArr[delStep];
+                    const {fragIndex, position} = pictureValue;
+                    // console.log('delSep',delStep)
+                    // console.log('fragindex', fragIndex)
+                    // console.log('positon', position)
+                    // console.log('pictures', state.sliceFragment.sliceFragmentArr[fragIndex])
+                    state.sliceFragment.sliceFragmentArr[fragIndex].pictures.splice(position, 0, deepCopy(pictureValue));
+                    if (fragIndex !== state.video.currentFragIndex) {
+                        //更改目前视频时间
+                        state.UpdateCurrentTime.isUpdateCurrentTime = true;
+                        state.UpdateCurrentTime.timeValue = state.sliceFragment.sliceFragmentArr[fragIndex].frag[0] + 0.1;
+
+                        //页面跳转
+                        state[state.IsVisible] = false;
+                        state.addPictureVisible = true;
+                        state.IsVisible = 'addPictureVisible';
+                    }
+                    break;
+                }
+
+            }
+        },
     },
     getters: { // 相当于计算属性
     },
@@ -486,8 +633,7 @@ export const store = createStore({
 
         //添加删除记录(传递过来的payload的数据是百分比)
         pushDeleteOptions(context, payload) {
-            context.commit('pushHistoryOptions', options.DELETE);
-
+            context.commit('pushHistoryOptions', options.DELETE_FRAG);
             context.commit('pushDeleteOptions', payload);
             let value = context.state.videTrack.inputBarValue;
             let mark = {}
@@ -507,7 +653,7 @@ export const store = createStore({
                 label: payload[1].toFixed(2) + 's'
             }
 
-            console.log('mark', mark)
+            // console.log('mark', mark)
             context.commit('addVideoInputBarMarks', mark);
         },
 
@@ -529,7 +675,10 @@ export const store = createStore({
         //添加切片 (payload是一个视频时间)
         addSliceFragmentArr(context, payload) {
 
-            context.commit('pushHistoryOptions', options.SLICE);
+            if (context.state.sliceFragment.sliceFragmentArr.length !== 0) {
+                context.commit('pushHistoryOptions', options.SLICE);
+            }
+
             context.commit('addSliceFragmentArr', payload);
             if (payload) {
                 let mark = {}
@@ -557,53 +706,59 @@ export const store = createStore({
         //添加字幕
         addSubtitleArr(context, payload) {
             context.commit('addSubtitleArr', payload);
+            //添加历史记录
             context.commit('pushHistoryOptions', options.ADD_SUBTITLE);
         },
         //清空输入值
-        clearInputValue(context){
+        clearInputValue(context) {
             context.commit('clearInputValue');
         },
 
         //设置图片的值
-        setPictureValue(context,payload){
-            context.commit('setPictureValue',payload);
+        setPictureValue(context, payload) {
+            context.commit('setPictureValue', payload);
         },
         //设置图片的位置
         setPicturePosition(context, payload) {
-           context.commit('setPicturePosition',payload)
+            context.commit('setPicturePosition', payload)
         },
 
         //清除图片值
-        clearPictureValue(context){
+        clearPictureValue(context) {
             context.commit('clearPictureValue');
         },
 
         //添加图片
-        addPictureArr(context,payload){
-            context.commit('addPictureArr',payload);
+        addPictureArr(context, payload) {
+            context.commit('addPictureArr', payload);
             //添加历史记录
-            context.commit('pushHistoryOptions',options.ADD_PICTURE);
+            context.commit('pushHistoryOptions', options.ADD_PICTURE);
         },
 
         //是否更新视频时间
-        isUpdateCurrentTime(context,payload){
-            context.commit('isUpdateCurrentTime',payload)
+        isUpdateCurrentTime(context, payload) {
+            context.commit('isUpdateCurrentTime', payload)
         },
 
         //改变视频时间
-        upDateCurrentTimeValue(context,payload){
-            context.commit('upDateCurrentTimeValue',payload);
+        upDateCurrentTimeValue(context, payload) {
+            context.commit('upDateCurrentTimeValue', payload);
         },
         //删除贴图操作
-        deletePicture(context,payload){
-            context.commit('deletePicture',payload);
-            context.commit('pushHistoryOptions',options.DELETE_PICTURE)
+        deletePicture(context, payload) {
+            context.commit('deletePicture', payload);
+            //个人技术有限,无法对已经删除的图片回退(删除图片后,访问路径是正确的,但是图片不加载,与blob有关,)
+            // context.commit('pushHistoryOptions', options.DELETE_PICTURE)
         },
 
         //删除字幕操作
-        deleteSubtitle(context,payload){
-            context.commit('deleteSubtitle',payload);
-            context.commit('pushHistoryOptions',options.DELETE_SUBTITLE)
+        deleteSubtitle(context, payload) {
+            context.commit('deleteSubtitle', payload);
+            context.commit('pushHistoryOptions', options.DELETE_SUBTITLE)
+        },
+        //历史记录回退
+        backHistory(context) {
+            context.commit('backHistory');
         }
 
     },
