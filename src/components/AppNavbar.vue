@@ -2,7 +2,7 @@
 <div class="navbar">
     <el-row class="tac" >
       <el-col :span="12">
-        <h2 class="mb-2">视频剪辑</h2>
+        <h3 class="mb-2">视频剪辑</h3>
         <el-menu
             active-text-color="#ffd04b"
             background-color="#545c64"
@@ -70,5 +70,12 @@ export default {
 }
 .el-menu{
   border-right: 0;
+  background-color: #29333a;
 }
+
+.navbar{
+  color:#e1ffff
+}
+
+
 </style>

@@ -17,12 +17,12 @@ export default {
 <style scoped>
 .header {
   position: absolute;
-  line-height: 50px;
+  height: 50px;
   padding: 0;
   top: 0;
   left: 0;
   right: 0;
-  background-color: #2d3a4b;
+  background-color: #d9e0e7;
   /*background-color: #545c64;*/
 }
 
@@ -33,7 +33,7 @@ export default {
   left: 0;
   bottom: 0;
   overflow-y: auto;
-  background-color: #545c64;
+  background-color: #29333a;
 }
 
 .main {

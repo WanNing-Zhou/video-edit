@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    你好
+    视频剪辑工具
   </div>
 </template>
 
@@ -11,5 +11,10 @@ export default {
 </script>
 
 <style scoped>
+
+.header{
+  font-size: 24px;
+  line-height: 50px;
+}
 
 </style>
