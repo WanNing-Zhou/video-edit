@@ -121,6 +121,12 @@ export const store = createStore({
             picturesArr: [],
         },
 
+        //更新视频时间
+        UpdateCurrentTime:{
+            isUpdateCurrentTime:false,
+            timeValue:0
+        },
+
     },
 
 
@@ -374,6 +380,16 @@ export const store = createStore({
             state.pictureArrState.pictureStep++;
         },
 
+
+        //是否更新视频时间
+        isUpdateCurrentTime(state,payload){
+            state.UpdateCurrentTime.isUpdateCurrentTime= payload;
+        },
+        //改变视频时间
+        upDateCurrentTimeValue(state,payload){
+            state.UpdateCurrentTime.timeValue = payload
+        },
+
     },
     getters: { // 相当于计算属性
     },
@@ -515,7 +531,19 @@ export const store = createStore({
             context.commit('addPictureArr',payload);
             //添加历史记录
             context.commit('pushHistoryOptions',options.ADD_PICTURE);
-        }
+        },
+
+        //是否更新视频时间
+        isUpdateCurrentTime(context,payload){
+            context.commit('isUpdateCurrentTime',payload)
+        },
+
+        //改变视频时间
+        upDateCurrentTimeValue(context,payload){
+            context.commit('upDateCurrentTimeValue',payload);
+        },
+
+
 
 
     },

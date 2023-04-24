@@ -52,6 +52,7 @@
 
 
       <div class="control-box" v-show="videoUrl!==''&&videoUrl">
+        <el-icon class="control-icon" @click="toStartTime" title="从头预览"><Refresh /></el-icon>
         <el-icon class="control-icon" @click="backOff" title="-5s">
           <DArrowLeft/>
         </el-icon>
@@ -64,6 +65,7 @@
         <el-icon class="control-icon" @click="forward" title="+5s">
           <DArrowRight/>
         </el-icon>
+        <el-input-number title="音量" v-model="volume" :precision="1" :step="0.1" :max="1" @change="volumeChange"/>
       </div>
     </div>
 
@@ -72,15 +74,15 @@
 
 <script>
 import {useStore} from 'vuex'
-import {computed, nextTick, onMounted, watch, ref, inject, reactive, getCurrentInstance} from "vue";
-import {DArrowLeft, VideoPlay, VideoPause, DArrowRight} from '@element-plus/icons-vue'
+import {computed, nextTick, onMounted, watch, ref, inject, reactive, getCurrentInstance,} from "vue";
+import {DArrowLeft, VideoPlay, VideoPause, DArrowRight,Refresh } from '@element-plus/icons-vue'
 import {debounce} from "@/utils/debounce";
 import videojs from 'video.js/dist/video'
 import throttle from '@/utils/throttle'
 
 export default {
   name: "VideoPlayer",
-  components: {DArrowLeft, DArrowRight, VideoPlay, VideoPause},
+  components: {DArrowLeft, DArrowRight, VideoPlay, VideoPause,Refresh },
   setup() {
 
     let player = null;
@@ -100,16 +102,41 @@ export default {
       return store.state.videoUrl;
     })
 
+    // 视频音量
+    const volume = ref(0.3);
+
+    //视频音量改变
+    const volumeChange=()=>{
+      // console.log(player)
+      player.volume(volume.value)
+    }
+
+    //重新播放
+    const toStartTime = ()=>{
+      player.currentTime(0)
+    }
+
     const currentFragIndex = ref(0);
 
-    const videoCurrentTime = computed(() => {
-      currentFragIndex.value = store.state.video.currentFragIndex;
-      return store.state.video.videoCurrentTime;
-    })
+    // const videoCurrentTime = computed(() => {
+    //   currentFragIndex.value = store.state.video.currentFragIndex;
+    //   return store.state.video.videoCurrentTime;
+    // })
 
+    const isUpdateCurrentTime = computed(()=>{
+      return store.state.UpdateCurrentTime.isUpdateCurrentTime
+    })
 
     // const {proxy} = getCurrentInstance();
 
+    watch(isUpdateCurrentTime,(newValue)=>{
+      if(newValue===true){
+        console.log('进度条变啦')
+        player.currentTime(store.state.UpdateCurrentTime.timeValue)
+        store.dispatch('isUpdateCurrentTime',false)
+        store.dispatch('upDateCurrentTimeValue',0)
+      }
+    },{immediate:true,deep:true})
 
     const debounceGetCurrentTime = debounce((newValue) => {
       // player.currentTime = newValue;
@@ -119,12 +146,15 @@ export default {
 
 
     //监听事件变化
-    watch(videoCurrentTime, (newValue) => {
+/*    watch(videoCurrentTime, (newValue) => {
       // document.querySelector('.myVideo').currentTime = newValue;
       // this.$refs.myVideo.currentTime = newValue;
       // console.log('监听到变化了')
       debounceGetCurrentTime(newValue)
-    })
+    })*/
+
+
+
 
     let kk = document.querySelector('.kk');
     const setCover = (event) => {//加载完成事件，调用函数
@@ -157,6 +187,7 @@ export default {
         let videoFrag = fragArr[i];
         if (videoCurrentTime >= videoFrag[0] && videoCurrentTime <= videoFrag[1]) {
           videoCurrentTime = videoFrag[1] + 0.01;
+          break;
         }
       }
 
@@ -166,7 +197,7 @@ export default {
       // console.log(event.target.currentTime)
       store.dispatch('updateVideoCurrentTime', videoCurrentTime)
       // console.log('currnet已经设置',store.state.video.videoCurrentTime)
-    }, 100, false)
+    }, 300, false)
 
     //监听视频时间变化
     const videoTimeUpdateHandler = (event) => {
@@ -213,7 +244,6 @@ export default {
     })
 
     // 获取当前片段的贴图数组
-
     const pictures = computed(()=>{
       // 当前视频片段位置
       const currentFragIndex = store.state.video.currentFragIndex;
@@ -234,7 +264,10 @@ export default {
       subtitleValue,
       subtitleArr,
       pictureValue,
-      pictures
+      pictures,
+      volume,
+      volumeChange,
+      toStartTime
     }
   },
 

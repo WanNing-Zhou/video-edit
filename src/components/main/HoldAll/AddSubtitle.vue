@@ -1,6 +1,6 @@
 <template>
   <div class="add-subtitle">
-    <h3>添加字幕</h3>
+    <h2>添加字幕</h2>
 
     <div>
       <span>字体大小</span>

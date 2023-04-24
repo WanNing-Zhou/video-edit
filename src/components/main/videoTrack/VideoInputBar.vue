@@ -64,10 +64,18 @@ export default {
         store.dispatch('updateVideoCurrentTime',time)
         store.dispatch('updateInputBarValue',value);
       }
-    },200,true)
+    },500,true)
 
      const valueChange = ()=>{
-       debounceValueChange(value.value)
+       console.log('我踏马来啦')
+       let time =value.value[1]  *totalTime.value /100;
+
+       store.dispatch('upDateCurrentTimeValue',time)
+       store.dispatch('updateInputBarValue',value.value);
+       store.dispatch('isUpdateCurrentTime',true)
+
+       // console.log('value',value.value)
+       // debounceValueChange(value.value)
      }
 
     return {

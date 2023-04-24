@@ -6,8 +6,9 @@
       <div class="util-bar">
         <!-- 这里需存放各种工具     -->
         <el-icon class="util-icon" title="撤销"><RefreshLeft /></el-icon>
-        <el-icon class="util-icon" title="分割" @click="sliceFragment"><SemiSelect /></el-icon>
+        <el-icon class="util-icon" title="分割" @click="sliceFragment"><Scissor /></el-icon>
         <el-icon class="util-icon" title="删除" @click="deleteFragment" ><Delete/></el-icon>
+        <el-icon class="util-icon" title="导出" @click="centerDialogVisible = true"><Download /></el-icon>
       </div>
       <div class="cc">
         <!--视频进度条        -->
@@ -17,21 +18,42 @@
       </div>
 
     </el-scrollbar>
+
+    <el-dialog
+        v-model="centerDialogVisible"
+        title="视频所需提交数据"
+        width="50%"
+        style="max-height: 70%"
+        align-center
+    >
+      <DataSheet></DataSheet>
+
+      <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="centerDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="centerDialogVisible = false">
+          Confirm
+        </el-button>
+      </span>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 import {onMounted, computed, watch, ref,reactive,getCurrentInstance} from "vue";
 import {useStore} from "vuex";
-import {SemiSelect,Delete,RefreshLeft} from '@element-plus/icons-vue'
+import {SemiSelect,Delete,RefreshLeft,Download,Scissor} from '@element-plus/icons-vue'
 import VideoInputBar from "@/components/main/videoTrack/VideoInputBar";
 import videojs from 'video.js/dist/video'
 import { ElMessage } from 'element-plus'
+import DataSheet from "@/components/main/videoTrack/DataSheet/DataSheet";
 
 
 export default {
   name: "VideoTrack",
-  components: {VideoInputBar,SemiSelect,Delete,RefreshLeft},
+  components: {DataSheet, VideoInputBar,SemiSelect,Delete,RefreshLeft,Download,Scissor},
   // components: {VideoInputBar},
   setup() {
     let timerId = null;
@@ -118,12 +140,16 @@ export default {
       })
     }
 
+    //对话框显示
+    const centerDialogVisible = ref(false);
+
     return {
       progressWidth,
       videoCurrentTime,
       totalTime,
       deleteFragment,
-      sliceFragment
+      sliceFragment,
+      centerDialogVisible
     }
   }
 }

@@ -11,6 +11,7 @@
         @click="addPictureHandler"
     >确认添加
     </el-button>
+    <br>
     <div>
       <span>图片大小</span>
       <el-input-number v-model="pictureSizeValue" :min="16" :max="500" @change="setPictureValue"/>
