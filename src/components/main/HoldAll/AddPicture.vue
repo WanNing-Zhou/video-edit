@@ -1,6 +1,6 @@
 <template>
-  <div class="add-picture">
-    <h2>添加图片</h2>
+  <div class="hold-all-inner add-picture">
+    <h2 class="action-title">添加图片</h2>
 
     <div>
       <el-button class="file-box" text>
@@ -16,12 +16,12 @@
     </div>
     <br>
     <div>
-      <span>图片大小</span>
+      <span>图片大小: </span>
       <el-input-number v-model="pictureSizeValue" :min="16" :step="20" :max="500" @change="setPictureValue"/>
     </div>
-
+    <br>
     <div>
-      <span>旋转角度</span>
+      <span>旋转角度: </span>
       <el-input-number v-model="pictureRotateValue" :min="0" :step="10" :max="360" @change="setPictureValue"/>
     </div>
 
@@ -31,7 +31,6 @@
         multiple
         list-type="picture"
         :auto-upload="false"
-        :on-preview="handlePreview"
         :on-remove="handleRemove"
         :limit="3"
         :on-exceed="handleExceed"
@@ -72,8 +71,19 @@ export default {
       store.dispatch('deletePicture',file);
     }
 
-    const handlePreview = (uploadFile) => {
-      console.log(uploadFile)
+
+    //判断是否有s视频
+    const isHaveVideoUrl = ()=>{
+      const url = store.state.videoUrl;
+      if(!url || url ===''){
+        ElMessage({
+          showClose: true,
+          message: '请先添加视频',
+          type: 'warning',
+        })
+        return false;
+      }
+      return true;
     }
 
     const handleExceed = (files, uploadFiles) => {
@@ -85,15 +95,6 @@ export default {
     }
 
 
-    const beforeRemove = (uploadFile, uploadFiles) => {
-      // console.log(uploadFile, uploadFiles)
-      return ElMessageBox.confirm(
-          `Cancel the transfer of ${uploadFile.name} ?`
-      ).then(
-          () => true,
-          () => false
-      )
-    }
 
     // const fileInput = ref();
     //全局存储照片名
@@ -103,6 +104,9 @@ export default {
     let file = '';
     //在vuex中更新pictureValue的值
     const setPictureValue = () => {
+      if(!isHaveVideoUrl()){
+        return;
+      }
       // console.log(`进入了`,name,url)
       if (name && name !== '' && url && url !== '') {
         let size = pictureSizeValue.value + 'px';
@@ -110,7 +114,6 @@ export default {
         store.dispatch('setPictureValue', {name, url, size, rotate, file})
         // console.log('pic', store.state.pictureValue)
       }
-
     }
 
     const urlList = ref([]);
@@ -118,6 +121,11 @@ export default {
     //文件按选择
     const handleFileSelect = () => {
       // console.log(fileInput.value)
+      // console.log(isHaveVideoUrl())
+      if(!isHaveVideoUrl()){
+        return;
+      }
+
       if (pictures && pictures.length >= 3) {
         ElMessage({
           showClose: true,
@@ -213,9 +221,7 @@ export default {
       pictureSizeValue,
       imgList,
       handleRemove,
-      handlePreview,
       handleExceed,
-      beforeRemove,
       handleFileSelect,
       addPictureHandler,
       setPictureValue
@@ -244,5 +250,13 @@ export default {
   -moz-opacity: 0;
   -khtml-opacity: 0;
   opacity: 0;
+}
+
+.action-title{
+  text-align: center;
+}
+
+.file-box:hover{
+  background-image:linear-gradient(135deg, rgba(245, 78, 162, 0.2), rgba(255, 118, 118, 0.2)) ;
 }
 </style>

@@ -24,7 +24,7 @@ export default {
   top: 0;
   bottom: 210px;
   width: 350px;
-  background-color: antiquewhite;
+  background-color: #f7f8fc;
 }
 
 .video-track{
@@ -32,7 +32,7 @@ export default {
   width: 100%;
   height: 210px;
   bottom: 0;
-  background-color: beige;
+  background-color: #ffffff;
 }
 
 .video-player{
@@ -41,7 +41,7 @@ export default {
   right: 0;
   top:0;
   bottom: 210px;
-  background-color: #545c64;
+  background-color: #bdc3c7;
 }
 
 

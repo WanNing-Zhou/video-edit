@@ -1,11 +1,9 @@
 //功能组件
 <template>
   <div class="hold-all">
-    <el-scrollbar >
       <add-picture v-show="addPictureVisible"></add-picture>
       <add-subtitle v-show="addSubtitleVisible"></add-subtitle>
       <select-media v-show="selectMediaVisible"></select-media>
-    </el-scrollbar>
   </div>
 
 </template>
@@ -66,6 +64,15 @@ export default {
   border-radius: 4px;
   background: var(--el-color-primary-light-9);
   color: var(--el-color-primary);
+}
+
+.action-title{
+  text-align: center;
+  width:100%;
+}
+
+.hold-all-inner{
+ margin-left: 10px;
 }
 
 </style>

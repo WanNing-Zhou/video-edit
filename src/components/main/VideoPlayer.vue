@@ -65,7 +65,10 @@
         <el-icon class="control-icon" @click="forward" title="+5s">
           <DArrowRight/>
         </el-icon>
-        <el-input-number title="音量" v-model="volume" :precision="1" :step="0.1" :max="1" @change="volumeChange"/>
+
+          <el-input-number title="音量" v-model="volume" :precision="1" :step="0.1" :min="0" :max="1" @change="volumeChange"/>
+
+
       </div>
     </div>
 
@@ -220,6 +223,9 @@ export default {
 
     //获取当前片段的字幕数组
     const subtitleArr= computed(()=>{
+      if(store.state.subtitlesArrState.subtitleStep===0){
+        return [];
+      }
       const currentFragIndex = store.state.video.currentFragIndex;
       //获取当前视频片段
       const fragment = store.state.sliceFragment.sliceFragmentArr[currentFragIndex];
@@ -485,6 +491,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-around;
+  margin-top: 10px;
 }
 
 .control-box .control-icon {

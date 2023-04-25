@@ -13,8 +13,9 @@ export default {
 <style scoped>
 
 .header{
-  font-size: 24px;
+  font-size: 20px;
   line-height: 50px;
+  text-align: center;
 }
 
 </style>

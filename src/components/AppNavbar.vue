@@ -9,7 +9,6 @@
             class="el-menu-vertical-demo"
             default-active="1"
             text-color="#fff"
-            @close="handleClose"
         >
           <el-menu-item index="1" ref="refMenuItem1" @click="changePage('updateSelectMediaVisible')">
             <el-icon><icon-menu /></el-icon>
@@ -55,7 +54,6 @@ export default {
 
     return{
       changePage,
-
     }
   }
 }

@@ -1,9 +1,9 @@
 <template>
-  <div class="add-subtitle">
-    <h2>添加字幕</h2>
+  <div class="hold-all-inner  add-subtitle">
+    <h2 class="action-title">添加字幕</h2>
 
     <div>
-      <span>字体大小</span>
+      <span>字体大小: </span>
       <el-input-number v-model="fontSizeValue" :min="8" :max="46" @change="subtitleInput"/>
     </div>
 
@@ -20,12 +20,12 @@
     </div>
 
     <div>
-      <span>字体颜色</span>
+      <span>字体颜色: </span>
       <el-color-picker v-model="colorValue" @change="subtitleInput" lable="选择颜色" show-alpha :predefine="predefineColors"/>
     </div>
 
     <div>
-      <span>字幕</span>
+      <span>字幕: </span>
       <el-input
           v-model="textValue"
           maxlength="30"
@@ -48,7 +48,7 @@
     <div>
         <div v-for="item in subtitleArr">
           <div
-              :style="`display: inline-block;font-family:${item.fontFamily}; color:${item.color};font-size:18px;`"
+              :style="`display: inline-block;font-family:${item.fontFamily}; color:black;font-size:18px;`"
               :key="item.position"
           >{{item.inputValue}}</div>
           <el-button
@@ -70,7 +70,7 @@ export default {
   name: "AddSubtitle",
   setup() {
     //字体颜色
-    const colorValue = ref('rgba(255, 69, 0, 0.68)')
+    const colorValue = ref('#ffffff')
     const predefineColors = ref([
       '#ff4500',
       '#ff8c00',
@@ -134,8 +134,27 @@ export default {
     //文本值
     const textValue = ref('')
 
+    //判断是否有视频
+    const isHaveVideoUrl = ()=>{
+      const url = store.state.videoUrl;
+      if(!url || url ===''){
+        ElMessage({
+          showClose: true,
+          message: '请先添加视频',
+          type: 'warning',
+        })
+        return false;
+      }
+      return true;
+    }
+
     //字幕输入时触发
     const subtitleInput = ()=>{
+
+      if(!isHaveVideoUrl()){
+        textValue.value='';
+        return;
+      }
 
       const currentFragIndex = store.state.video.currentFragIndex;
       // console.log(currentFragIndex)
@@ -149,6 +168,7 @@ export default {
           message: '仅支持添加两条字幕',
           type: 'warning',
         })
+        textValue.value = '';
         return;
       }
 
@@ -164,6 +184,12 @@ export default {
 
     //点击添加字幕的时候进行操作
     const addSubtitleHandler = async ()=>{
+
+      if(!isHaveVideoUrl()){
+        textValue.value='';
+        return;
+      }
+
       //获取当前时间片段
       const currentFragIndex = store.state.video.currentFragIndex;
       // console.log(currentFragIndex)
@@ -242,5 +268,9 @@ export default {
 
 .add-subtitle > div {
   margin: 5px;
+}
+
+.action-title{
+  text-align: center;
 }
 </style>

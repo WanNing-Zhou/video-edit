@@ -22,7 +22,8 @@ export default {
   top: 0;
   left: 0;
   right: 0;
-  background-color: #d9e0e7;
+  background-color:#2d3436;
+  color:#e1ffff;
   /*background-color: #545c64;*/
 }
 

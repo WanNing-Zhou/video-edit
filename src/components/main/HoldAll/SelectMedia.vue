@@ -1,6 +1,6 @@
 <template>
-  <div class="selected-media">
-    <h2>选择媒体</h2>
+  <div class="hold-all-inner  selected-media">
+    <h2 class="action-title">选择媒体</h2>
     <el-button class="file-box" text>
       <input type="file" id="file" class="file-btn" required
              @change="handleFileSelect"/> 选择文件
@@ -113,4 +113,12 @@ export default {
   -khtml-opacity: 0;
   opacity: 0;
 }
+.action-title{
+  text-align: center;
+}
+
+.file-box:hover{
+  background-image:linear-gradient(135deg, rgba(245, 78, 162, 0.2), rgba(255, 118, 118, 0.2)) ;
+}
+
 </style>

@@ -3,13 +3,16 @@
 
 
     <el-scrollbar>
-      <div class="util-bar">
-        <!-- 这里需存放各种工具     -->
-        <el-icon class="util-icon" title="撤销" @click="backHistory"><RefreshLeft /></el-icon>
-        <el-icon class="util-icon" title="分割" @click="sliceFragment"><Scissor /></el-icon>
-        <el-icon class="util-icon" title="删除" @click="deleteFragment" ><Delete/></el-icon>
-        <el-icon class="util-icon" title="导出" @click="centerDialogVisible = true"><Download /></el-icon>
+      <div class="util-bar-box">
+        <div class="util-bar">
+          <!-- 这里需存放各种工具     -->
+          <el-icon class="util-icon" title="撤销" @click="backHistory"><RefreshLeft /></el-icon>
+          <el-icon class="util-icon" title="分割" @click="sliceFragment"><Scissor /></el-icon>
+          <el-icon class="util-icon" title="删除" @click="deleteFragment" ><Delete/></el-icon>
+          <el-icon class="util-icon" title="导出" @click="centerDialogVisible = true"><Download /></el-icon>
+        </div>
       </div>
+
       <div class="cc">
         <!--视频进度条        -->
         <div class="progress" id="progress" :style="`width:${progressWidth}px`"></div>
@@ -204,9 +207,14 @@ export default {
   width: 1000px;
   background-color: #0AAEB3;
 }
-.util-bar{
+.util-bar-box{
+  height: 36px;
   position: absolute;
-  top: 5%;
+  width: 100%;
+  background-color: #f1f2f6;
+}
+.util-bar{
+  height: 36px;
   width: 600px;
   display: flex;
   justify-content: space-around;
@@ -215,8 +223,11 @@ export default {
   font-size:20px;
 }
 
+
 .util-bar .util-icon{
   cursor: pointer;
+  font-size:20px;
+  line-height: 36px;
 }
 
 .util-bar .util-icon:hover{
@@ -226,7 +237,7 @@ export default {
 .cc{
    position: absolute;
     top: 50%;
-  left: 50%;
+    left: 50%;
   transform: translate(-50%,-50%);
 }
 
