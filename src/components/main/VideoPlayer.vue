@@ -505,14 +505,14 @@ export default {
 
 .video-screen {
   position: relative;
-  width: 750px;
-  height: 400px;
+  width: 720px;
+  height: 380px;
 }
 
 .myVideo {
   position: absolute;
-  width: 750px;
-  height: 400px;
+  width: 720px;
+  height: 380px;
 }
 
 .drawingBoard {

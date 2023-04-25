@@ -17,7 +17,7 @@ export default {
 <style scoped>
 .header {
   position: absolute;
-  height: 50px;
+  height: 40px;
   padding: 0;
   top: 0;
   left: 0;
@@ -30,7 +30,7 @@ export default {
 .navbar {
   position: absolute;
   width: 200px;
-  top: 50px;
+  top: 40px;
   left: 0;
   bottom: 0;
   overflow-y: auto;
@@ -39,7 +39,7 @@ export default {
 
 .main {
   position: absolute;
-  top: 50px;
+  top: 40px;
   left: 200px;
   right: 0;
   bottom: 0;

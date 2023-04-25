@@ -14,7 +14,7 @@ export default {
 
 .header{
   font-size: 20px;
-  line-height: 50px;
+  line-height: 40px;
   text-align: center;
 }
 
