@@ -49,8 +49,11 @@ export const store = createStore({
         },
         //用来保存历史操作
         history: {
+            // 历史操作栈
             historyOptionsArr: [],
+            // 栈的长度
             historyOptionStep: 0,
+            // 视频导航条的状态
             videoInputBarMarksArr: [{
                 '0': {style: {color: '#81e35b', fontWeight: '700'}, label: '0.00s'},
                 '100': {style: {color: '#0ede30', fontWeight: '700'}, label: '100%'},
@@ -69,12 +72,13 @@ export const store = createStore({
         subtitlesArrState: {
             //用于字幕添加的时候为字幕添加id
             id: 0,
-            //步骤
+            //添加字幕栈长
             subtitleStep: 0,
-            //字幕数组栈
+            //添加字幕栈(站内存储状态)
             subtitlesArr: [],
-            //字幕删除步骤
+            //删除字幕栈长
             delStep: 0,
+            //删除字幕栈
             delSubtitleArr: []
         },
 
